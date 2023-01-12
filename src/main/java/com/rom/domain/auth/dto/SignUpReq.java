@@ -9,9 +9,9 @@ import jakarta.validation.constraints.NotBlank;
 @Data
 public class SignUpReq {
 
-    @Schema( type = "string", example = "string", description="계정 명 입니다.")
+    @Schema( type = "string", example = "string", description="닉네임 입니다.")
     @NotBlank
-    private String name;
+    private String nickname;
 
     @Schema( type = "string", example = "string@aa.bb", description="계정 이메일 입니다.")
     @NotBlank
@@ -21,4 +21,5 @@ public class SignUpReq {
     @Schema( type = "string", example = "string", description="계정 비밀번호 입니다.")
     @NotBlank
     private String password;
+
 }

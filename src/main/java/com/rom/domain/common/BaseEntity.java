@@ -2,9 +2,7 @@ package com.rom.domain.common;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -19,9 +17,12 @@ public abstract class BaseEntity {
 
     @CreatedDate
     @Column(updatable=false)
-    private LocalDateTime createdDate;
+    private LocalDateTime createdAt;
 
     @LastModifiedDate
-    private LocalDateTime modifiedDate;
+    private LocalDateTime modifiedAt;
+
+    @Enumerated(value = EnumType.STRING)
+    private Status status;
 
 }
