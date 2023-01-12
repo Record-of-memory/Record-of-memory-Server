@@ -6,6 +6,7 @@ import com.rom.domain.diary.domain.UserDiary;
 import com.rom.domain.diary.domain.repository.DiaryRepository;
 import com.rom.domain.diary.domain.repository.UserDiaryRepository;
 import com.rom.domain.diary.dto.CreateDiaryReq;
+import com.rom.domain.diary.dto.DiaryDetailRes;
 import com.rom.domain.user.domain.User;
 import com.rom.domain.user.domain.repository.UserRepository;
 import com.rom.global.DefaultAssert;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -54,4 +56,20 @@ public class DiaryService {
         return ResponseEntity.ok(apiResponse);
     }
 
+    public ResponseEntity<?> findDiariesByUserId(UserPrincipal userPrincipal) {
+        List<Diary> diaries = userDiaryRepository.findAllByUserId(userPrincipal.getId()).stream()
+                .map(UserDiary::getDiary)
+                .toList();
+
+        List<DiaryDetailRes> diaryDetailRes = diaries.stream()
+                .map(diary -> DiaryDetailRes.builder().id(diary.getId()).name(diary.getName()).diaryType(diary.getDiaryType().toString()).build())
+                .toList();
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(diaryDetailRes)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
 }

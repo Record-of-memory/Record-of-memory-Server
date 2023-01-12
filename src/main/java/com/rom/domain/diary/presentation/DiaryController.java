@@ -2,6 +2,7 @@ package com.rom.domain.diary.presentation;
 
 import com.rom.domain.diary.application.DiaryService;
 import com.rom.domain.diary.dto.CreateDiaryReq;
+import com.rom.domain.diary.dto.DiaryDetailRes;
 import com.rom.global.config.security.token.CurrentUser;
 import com.rom.global.config.security.token.UserPrincipal;
 import com.rom.global.payload.ErrorResponse;
@@ -16,15 +17,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Diaries", description = "Diaries API")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/diaries")
+@RequestMapping("/api/v1/diaries")
 public class DiaryController {
 
     private final DiaryService diaryService;
@@ -40,6 +38,18 @@ public class DiaryController {
             @Parameter(description = "Schemas의 CreateDiaryReq를 참고해주세요.", required = true) @Valid @RequestBody CreateDiaryReq createDiaryReq
             ){
         return diaryService.createDiary(userPrincipal, createDiaryReq);
+    }
+
+    @Operation(summary = "유저의 다이어리 목록 조회", description = "유저의 다이어리 목록을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "유저의 다이어리 목록 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = DiaryDetailRes.class))}),
+            @ApiResponse(responseCode = "200", description = "유저의 다이어리 목록 조회 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
+    @GetMapping
+    public ResponseEntity<?> findDiariesByUserAccessToken(
+            @Parameter(description = "AccessToken을 입력해주세요", required = true) @CurrentUser UserPrincipal userPrincipal
+    ){
+        return diaryService.findDiariesByUserId(userPrincipal);
     }
 
 }
