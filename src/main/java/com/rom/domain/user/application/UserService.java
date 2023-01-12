@@ -18,8 +18,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Service
 public class UserService {
 
@@ -28,6 +30,7 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public ResponseEntity<?> delete(UserPrincipal userPrincipal){
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다.");
@@ -43,6 +46,7 @@ public class UserService {
         return ResponseEntity.ok(apiResponse);
     }
 
+    @Transactional
     public ResponseEntity<?> modify(UserPrincipal userPrincipal, @Valid ChangePasswordReq passwordChangeRequest){
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         boolean passwordCheck = passwordEncoder.matches(passwordChangeRequest.getOldPassword(),user.get().getPassword());

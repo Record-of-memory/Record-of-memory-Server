@@ -23,6 +23,6 @@ public abstract class BaseEntity {
     private LocalDateTime modifiedAt;
 
     @Enumerated(value = EnumType.STRING)
-    private Status status;
+    private Status status = Status.ACTIVE;
 
 }
