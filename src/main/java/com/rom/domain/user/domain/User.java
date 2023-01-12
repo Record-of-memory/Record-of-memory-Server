@@ -12,61 +12,53 @@ import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.rom.domain.common.BaseEntity;
-import org.hibernate.annotations.DynamicUpdate;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@DynamicUpdate
-@Entity
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
 public class User extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
-    private String name;
 
     @Email
     @Column(nullable = false)
     private String email;
 
-    private String imageUrl;
-
     @Column(nullable = false)
-    private Boolean emailVerified = false;
+    private String nickname;
 
     @JsonIgnore
+    @Column(nullable = false)
     private String password;
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private Provider provider;
+    private String imageUrl;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    private String providerId;
-    
-    public User(){}
-
     @Builder
-    public User(String name, String email, String password, Role role, Provider provider, String providerId, String imageUrl){
+    public User(Long id, String email, String nickname, String password, String imageUrl, Role role) {
+        this.id = id;
         this.email = email;
-        this.name = name;
-        this.imageUrl = imageUrl;
+        this.nickname = nickname;
         this.password = password;
-        this.provider = provider;
-        this.providerId = providerId;
+        this.imageUrl = imageUrl;
         this.role = role;
     }
 
-    public void updateName(String name){
-        this.name = name;
+    public void updateNickName(String nickname){
+        this.nickname = nickname;
     }
 
     public void updateImageUrl(String imageUrl){
         this.imageUrl = imageUrl;
     }
+
 }
