@@ -14,8 +14,10 @@ public interface UserDiaryRepository extends JpaRepository<UserDiary, Long> {
 
     List<UserDiary> findAllByUserId(Long id);
 
-    List<UserDiary> findALlByDiaryId(Long id);
+    List<UserDiary> findAllByDiaryId(Long id);
 
     boolean existsUserDiaryByUserAndDiary(User user, Diary diary);
+
+    boolean existsUserDiaryByDiary(Diary diary);
 
 }

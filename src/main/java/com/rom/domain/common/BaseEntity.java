@@ -25,4 +25,8 @@ public abstract class BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private Status status = Status.ACTIVE;
 
+    public void updateStatus(Status status) {
+        this.status = status;
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.rom.domain.diary.application;
 
+import com.rom.domain.common.Status;
 import com.rom.domain.diary.domain.Diary;
 import com.rom.domain.diary.domain.DiaryType;
 import com.rom.domain.diary.domain.UserDiary;
@@ -13,7 +14,6 @@ import com.rom.domain.user.domain.User;
 import com.rom.domain.user.domain.repository.UserRepository;
 import com.rom.global.DefaultAssert;
 import com.rom.global.config.security.token.UserPrincipal;
-import com.rom.global.error.DefaultException;
 import com.rom.global.payload.ApiResponse;
 import com.rom.global.payload.Message;
 import lombok.RequiredArgsConstructor;
@@ -119,6 +119,10 @@ public class DiaryService {
         DefaultAssert.isTrue(userDiary.isPresent(), "UserDiary가 올바르지 않습니다");
 
         userDiaryRepository.delete(userDiary.get());
+
+        if (!userDiaryRepository.existsUserDiaryByDiary(diary.get())) {
+            diary.get().updateStatus(Status.DELETE);
+        }
 
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
