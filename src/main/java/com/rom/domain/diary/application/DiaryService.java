@@ -8,6 +8,7 @@ import com.rom.domain.diary.domain.repository.UserDiaryRepository;
 import com.rom.domain.diary.dto.CreateDiaryReq;
 import com.rom.domain.diary.dto.DiaryDetailRes;
 import com.rom.domain.diary.dto.InviteUserReq;
+import com.rom.domain.diary.dto.LeaveDiaryReq;
 import com.rom.domain.user.domain.User;
 import com.rom.domain.user.domain.repository.UserRepository;
 import com.rom.global.DefaultAssert;
@@ -80,7 +81,7 @@ public class DiaryService {
         DefaultAssert.isTrue(inviteUser.isPresent(), "유저가 올바르지 않습니다.");
 
         Optional<Diary> diary = diaryRepository.findById(inviteUserReq.getDiaryId());
-        DefaultAssert.isTrue(diary.isPresent(), "다이어리가 존재하지 않습니다");
+        DefaultAssert.isTrue(diary.isPresent(), "다이어리가 올바르지 않습니다");
 
         UserDiary userDiary = UserDiary.builder()
                 .diary(diary.get())
@@ -92,6 +93,27 @@ public class DiaryService {
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
                 .information(Message.builder().message("유저 초대가 완료되었습니다.").build())
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @Transactional
+    public ResponseEntity<?> leaveDiary(UserPrincipal userPrincipal, LeaveDiaryReq leaveDiaryReq) {
+        Optional<User> user = userRepository.findById(userPrincipal.getId());
+        DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다");
+
+        Optional<Diary> diary = diaryRepository.findById(leaveDiaryReq.getDiaryId());
+        DefaultAssert.isTrue(diary.isPresent(), "다이어리가 올바르지 않습니다.");
+
+        Optional<UserDiary> userDiary = userDiaryRepository.findUserDiaryByUserAndDiary(user.get(), diary.get());
+        DefaultAssert.isTrue(userDiary.isPresent(), "UserDiary가 올바르지 않습니다");
+
+        userDiaryRepository.delete(userDiary.get());
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(Message.builder().message("다이어리 나가기가 완료되었습니다.").build())
                 .build();
 
         return ResponseEntity.ok(apiResponse);
