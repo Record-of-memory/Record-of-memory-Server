@@ -1,6 +1,5 @@
 package com.rom.domain.diary.dto;
 
-import com.rom.domain.diary.domain.DiaryType;
 import lombok.Builder;
 import lombok.Data;
 

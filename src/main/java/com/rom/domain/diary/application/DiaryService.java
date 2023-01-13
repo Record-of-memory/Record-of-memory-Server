@@ -7,6 +7,7 @@ import com.rom.domain.diary.domain.repository.DiaryRepository;
 import com.rom.domain.diary.domain.repository.UserDiaryRepository;
 import com.rom.domain.diary.dto.CreateDiaryReq;
 import com.rom.domain.diary.dto.DiaryDetailRes;
+import com.rom.domain.diary.dto.InviteUserReq;
 import com.rom.domain.user.domain.User;
 import com.rom.domain.user.domain.repository.UserRepository;
 import com.rom.global.DefaultAssert;
@@ -72,4 +73,28 @@ public class DiaryService {
 
         return ResponseEntity.ok(apiResponse);
     }
+
+    @Transactional
+    public ResponseEntity<?> inviteUser(InviteUserReq inviteUserReq) {
+        Optional<User> inviteUser = userRepository.findByEmail(inviteUserReq.getEmail());
+        DefaultAssert.isTrue(inviteUser.isPresent(), "유저가 올바르지 않습니다.");
+
+        Optional<Diary> diary = diaryRepository.findById(inviteUserReq.getDiaryId());
+        DefaultAssert.isTrue(diary.isPresent(), "다이어리가 존재하지 않습니다");
+
+        UserDiary userDiary = UserDiary.builder()
+                .diary(diary.get())
+                .user(inviteUser.get())
+                .build();
+
+        userDiaryRepository.save(userDiary);
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(Message.builder().message("유저 초대가 완료되었습니다.").build())
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
 }
