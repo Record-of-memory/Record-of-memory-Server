@@ -13,6 +13,7 @@ import com.rom.domain.user.domain.User;
 import com.rom.domain.user.domain.repository.UserRepository;
 import com.rom.global.DefaultAssert;
 import com.rom.global.config.security.token.UserPrincipal;
+import com.rom.global.error.DefaultException;
 import com.rom.global.payload.ApiResponse;
 import com.rom.global.payload.Message;
 import lombok.RequiredArgsConstructor;
@@ -82,6 +83,14 @@ public class DiaryService {
 
         Optional<Diary> diary = diaryRepository.findById(inviteUserReq.getDiaryId());
         DefaultAssert.isTrue(diary.isPresent(), "다이어리가 올바르지 않습니다");
+
+        if (userDiaryRepository.existsUserDiaryByUserAndDiary(inviteUser.get(), diary.get())){
+            ApiResponse apiResponse = ApiResponse.builder()
+                    .check(false)
+                    .information(Message.builder().message("이미 존재하는 유저입니다.").build())
+                    .build();
+            return ResponseEntity.ok(apiResponse);
+        }
 
         UserDiary userDiary = UserDiary.builder()
                 .diary(diary.get())
