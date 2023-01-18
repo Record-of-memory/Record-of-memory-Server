@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import com.rom.domain.auth.dto.*;
 import com.rom.global.DefaultAssert;
-import com.rom.global.config.security.token.UserPrincipal;
 
 import com.rom.domain.user.domain.Role;
 import com.rom.domain.auth.domain.Token;
@@ -15,7 +14,6 @@ import com.rom.global.payload.Message;
 import com.rom.domain.auth.domain.repository.TokenRepository;
 import com.rom.domain.user.domain.repository.UserRepository;
 
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 
 
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Service
 public class AuthService {
 
@@ -40,6 +40,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
 
+    @Transactional
     public ResponseEntity<?> signIn(SignInReq signInRequest){
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
@@ -57,10 +58,16 @@ public class AuthService {
                             .build();
         tokenRepository.save(token);
         AuthRes authResponse = AuthRes.builder().accessToken(tokenMapping.getAccessToken()).refreshToken(token.getRefreshToken()).build();
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(authResponse)
+                .build();
         
-        return ResponseEntity.ok(authResponse);
+        return ResponseEntity.ok(apiResponse);
     }
 
+    @Transactional
     public ResponseEntity<?> signUp(SignUpReq signUpRequest){
         DefaultAssert.isTrue(!userRepository.existsByEmail(signUpRequest.getEmail()), "해당 이메일이 존재하지 않습니다.");
 
@@ -81,6 +88,7 @@ public class AuthService {
         return ResponseEntity.created(location).body(apiResponse);
     }
 
+    @Transactional
     public ResponseEntity<?> refresh(RefreshTokenReq tokenRefreshRequest){
         //1차 검증
         boolean checkValid = valid(tokenRefreshRequest.getRefreshToken());
@@ -108,6 +116,7 @@ public class AuthService {
         return ResponseEntity.ok(authResponse);
     }
 
+    @Transactional
     public ResponseEntity<?> signOut(RefreshTokenReq tokenRefreshRequest){
         boolean checkValid = valid(tokenRefreshRequest.getRefreshToken());
         DefaultAssert.isAuthentication(checkValid);
