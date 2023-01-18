@@ -6,6 +6,7 @@ import com.rom.domain.auth.domain.repository.TokenRepository;
 import com.rom.domain.user.dto.UserDetailRes;
 import com.rom.global.DefaultAssert;
 import com.rom.domain.user.domain.User;
+import com.rom.global.config.security.token.UserPrincipal;
 import com.rom.global.payload.ApiResponse;
 import com.rom.domain.user.domain.repository.UserRepository;
 
@@ -47,5 +48,24 @@ public class UserService {
         return ResponseEntity.ok(apiResponse);
     }
 
+    public ResponseEntity<?> findUserByAccessToken(UserPrincipal userPrincipal) {
+        Optional<User> user = userRepository.findById(userPrincipal.getId());
+        DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다");
+
+        User findUser = user.get();
+        UserDetailRes userDetailRes = UserDetailRes.builder()
+                .email(findUser.getEmail())
+                .nickname(findUser.getNickname())
+                .imageUrl(findUser.getImageUrl())
+                .role(findUser.getRole())
+                .build();
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(userDetailRes)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
 
 }
