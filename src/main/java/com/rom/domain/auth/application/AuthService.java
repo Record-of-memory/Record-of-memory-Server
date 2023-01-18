@@ -39,17 +39,8 @@ public class AuthService {
     
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
-    
 
-    public ResponseEntity<?> whoAmI(UserPrincipal userPrincipal){
-        Optional<User> user = userRepository.findById(userPrincipal.getId());
-        DefaultAssert.isOptionalPresent(user);
-        ApiResponse apiResponse = ApiResponse.builder().check(true).information(user.get()).build();
-
-        return ResponseEntity.ok(apiResponse);
-    }
-
-    public ResponseEntity<?> signin(SignInReq signInRequest){
+    public ResponseEntity<?> signIn(SignInReq signInRequest){
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
                 signInRequest.getEmail(),
@@ -70,7 +61,7 @@ public class AuthService {
         return ResponseEntity.ok(authResponse);
     }
 
-    public ResponseEntity<?> signup(SignUpReq signUpRequest){
+    public ResponseEntity<?> signUp(SignUpReq signUpRequest){
         DefaultAssert.isTrue(!userRepository.existsByEmail(signUpRequest.getEmail()), "해당 이메일이 존재하지 않습니다.");
 
         User user = User.builder()
@@ -117,7 +108,7 @@ public class AuthService {
         return ResponseEntity.ok(authResponse);
     }
 
-    public ResponseEntity<?> signout(RefreshTokenReq tokenRefreshRequest){
+    public ResponseEntity<?> signOut(RefreshTokenReq tokenRefreshRequest){
         boolean checkValid = valid(tokenRefreshRequest.getRefreshToken());
         DefaultAssert.isAuthentication(checkValid);
 
