@@ -4,6 +4,7 @@ import com.rom.domain.comment.domain.Comment;
 import com.rom.domain.comment.domain.repository.CommentRepository;
 import com.rom.domain.comment.dto.DeleteCommentReq;
 import com.rom.domain.comment.dto.WriteCommentReq;
+import com.rom.domain.common.Status;
 import com.rom.domain.record.domain.Record;
 import com.rom.domain.record.domain.repository.RecordRepository;
 import com.rom.domain.user.domain.User;
@@ -41,6 +42,8 @@ public class CommentService {
 
         Comment comment = Comment.builder()
                 .content(writeCommentReq.getContent())
+                .user(user.get())
+                .record(record.get())
                 .build();
 
         commentRepository.save(comment);
@@ -63,7 +66,7 @@ public class CommentService {
         Optional<Comment> comment = commentRepository.findById(deleteCommentReq.getCommentId());
         DefaultAssert.isTrue(comment.isPresent(), "댓글이 올바르지 않습니다");
 
-        commentRepository.delete(comment.get());
+        comment.get().updateStatus(Status.DELETE);
 
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
