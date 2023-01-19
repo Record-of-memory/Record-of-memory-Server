@@ -14,9 +14,4 @@ public class RefreshTokenReq {
     @NotBlank
     private String refreshToken;
 
-    @Builder
-    public RefreshTokenReq(String refreshToken){
-        this.refreshToken = refreshToken;
-    }
-
 }

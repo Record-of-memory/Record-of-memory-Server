@@ -14,18 +14,17 @@ import com.rom.global.payload.Message;
 import com.rom.domain.auth.domain.repository.TokenRepository;
 import com.rom.domain.user.domain.repository.UserRepository;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import lombok.RequiredArgsConstructor;
-
 
 
 @RequiredArgsConstructor
@@ -36,12 +35,12 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final CustomTokenProviderService customTokenProviderService;
-    
+
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
 
     @Transactional
-    public ResponseEntity<?> signIn(SignInReq signInRequest){
+    public ResponseEntity<?> signIn(SignInReq signInRequest) {
         Optional<User> user = userRepository.findByEmail(signInRequest.getEmail());
         DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다");
 
@@ -50,17 +49,17 @@ public class AuthService {
         DefaultAssert.isTrue(passwordCheck, "비밀번호가 일치하지 않습니다");
 
         Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                signInRequest.getEmail(),
-                signInRequest.getPassword()
-            )
+                new UsernamePasswordAuthenticationToken(
+                        signInRequest.getEmail(),
+                        signInRequest.getPassword()
+                )
         );
 
         TokenMapping tokenMapping = customTokenProviderService.createToken(authentication);
         Token token = Token.builder()
-                            .refreshToken(tokenMapping.getRefreshToken())
-                            .userEmail(tokenMapping.getUserEmail())
-                            .build();
+                .refreshToken(tokenMapping.getRefreshToken())
+                .userEmail(tokenMapping.getUserEmail())
+                .build();
         tokenRepository.save(token);
         AuthRes authResponse = AuthRes.builder().accessToken(tokenMapping.getAccessToken()).refreshToken(token.getRefreshToken()).build();
 
@@ -68,20 +67,20 @@ public class AuthService {
                 .check(true)
                 .information(authResponse)
                 .build();
-        
+
         return ResponseEntity.ok(apiResponse);
     }
 
     @Transactional
-    public ResponseEntity<?> signUp(SignUpReq signUpRequest){
+    public ResponseEntity<?> signUp(SignUpReq signUpRequest) {
         DefaultAssert.isTrue(!userRepository.existsByEmail(signUpRequest.getEmail()), "해당 이메일이 존재합니다.");
 
         User user = User.builder()
-                        .nickname(signUpRequest.getNickname())
-                        .email(signUpRequest.getEmail())
-                        .password(passwordEncoder.encode(signUpRequest.getPassword()))
-                        .role(Role.USER)
-                        .build();
+                .nickname(signUpRequest.getNickname())
+                .email(signUpRequest.getEmail())
+                .password(passwordEncoder.encode(signUpRequest.getPassword()))
+                .role(Role.USER)
+                .build();
 
         userRepository.save(user);
 
@@ -97,35 +96,36 @@ public class AuthService {
     }
 
     @Transactional
-    public ResponseEntity<?> refresh(RefreshTokenReq tokenRefreshRequest){
-        //1차 검증
-        boolean checkValid = valid(tokenRefreshRequest.getRefreshToken());
-        DefaultAssert.isAuthentication(checkValid);
+    public ResponseEntity<?> refresh(RefreshTokenReq tokenRefreshRequest) {
 
         Optional<Token> token = tokenRepository.findByRefreshToken(tokenRefreshRequest.getRefreshToken());
+        DefaultAssert.isTrue(token.isPresent(), "다시 로그인 해주세요.");
         Authentication authentication = customTokenProviderService.getAuthenticationByEmail(token.get().getUserEmail());
 
-        //4. refresh token 정보 값을 업데이트 한다.
-        //시간 유효성 확인
         TokenMapping tokenMapping;
 
-        Long expirationTime = customTokenProviderService.getExpiration(tokenRefreshRequest.getRefreshToken());
-        if(expirationTime > 0){
+        try {
+            Long expirationTime = customTokenProviderService.getExpiration(tokenRefreshRequest.getRefreshToken());
             tokenMapping = customTokenProviderService.refreshToken(authentication, token.get().getRefreshToken());
-        }else{
+        } catch (ExpiredJwtException ex) {
             tokenMapping = customTokenProviderService.createToken(authentication);
+            token.get().updateRefreshToken(tokenMapping.getRefreshToken());
         }
 
         Token updateToken = token.get().updateRefreshToken(tokenMapping.getRefreshToken());
-        tokenRepository.save(updateToken);
 
         AuthRes authResponse = AuthRes.builder().accessToken(tokenMapping.getAccessToken()).refreshToken(updateToken.getRefreshToken()).build();
 
-        return ResponseEntity.ok(authResponse);
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(authResponse)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
     }
 
     @Transactional
-    public ResponseEntity<?> signOut(RefreshTokenReq tokenRefreshRequest){
+    public ResponseEntity<?> signOut(RefreshTokenReq tokenRefreshRequest) {
         boolean checkValid = valid(tokenRefreshRequest.getRefreshToken());
         DefaultAssert.isAuthentication(checkValid);
 
@@ -137,7 +137,7 @@ public class AuthService {
         return ResponseEntity.ok(apiResponse);
     }
 
-    private boolean valid(String refreshToken){
+    private boolean valid(String refreshToken) {
 
         //1. 토큰 형식 물리적 검증
         boolean validateCheck = customTokenProviderService.validateToken(refreshToken);
@@ -145,7 +145,7 @@ public class AuthService {
 
         //2. refresh token 값을 불러온다.
         Optional<Token> token = tokenRepository.findByRefreshToken(refreshToken);
-        DefaultAssert.isTrue(token.isPresent(), "탈퇴 처리된 회원입니다.");
+        DefaultAssert.isTrue(token.isPresent(), "로그아웃 처리된 회원입니다.");
 
         //3. email 값을 통해 인증값을 불러온다
         Authentication authentication = customTokenProviderService.getAuthenticationByEmail(token.get().getUserEmail());
