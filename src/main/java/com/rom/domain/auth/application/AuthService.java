@@ -42,6 +42,13 @@ public class AuthService {
 
     @Transactional
     public ResponseEntity<?> signIn(SignInReq signInRequest){
+        Optional<User> user = userRepository.findByEmail(signInRequest.getEmail());
+        DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다");
+
+        User findUser = user.get();
+        boolean passwordCheck = passwordEncoder.matches(signInRequest.getPassword(), findUser.getPassword());
+        DefaultAssert.isTrue(passwordCheck, "비밀번호가 일치하지 않습니다");
+
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
                 signInRequest.getEmail(),
