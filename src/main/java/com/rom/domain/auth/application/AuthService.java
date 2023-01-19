@@ -56,8 +56,6 @@ public class AuthService {
             )
         );
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
         TokenMapping tokenMapping = customTokenProviderService.createToken(authentication);
         Token token = Token.builder()
                             .refreshToken(tokenMapping.getRefreshToken())
@@ -76,7 +74,7 @@ public class AuthService {
 
     @Transactional
     public ResponseEntity<?> signUp(SignUpReq signUpRequest){
-        DefaultAssert.isTrue(!userRepository.existsByEmail(signUpRequest.getEmail()), "해당 이메일이 존재하지 않습니다.");
+        DefaultAssert.isTrue(!userRepository.existsByEmail(signUpRequest.getEmail()), "해당 이메일이 존재합니다.");
 
         User user = User.builder()
                         .nickname(signUpRequest.getNickname())
@@ -88,9 +86,12 @@ public class AuthService {
         userRepository.save(user);
 
         URI location = ServletUriComponentsBuilder
-                .fromCurrentContextPath().path("/auth/")
+                .fromCurrentContextPath().path("/users/")
                 .buildAndExpand(user.getId()).toUri();
-        ApiResponse apiResponse = ApiResponse.builder().check(true).information(Message.builder().message("회원가입에 성공하였습니다.").build()).build();
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(Message.builder().message("회원가입에 성공했습니다.").build())
+                .build();
 
         return ResponseEntity.created(location).body(apiResponse);
     }
