@@ -60,6 +60,7 @@ public class AuthService {
                 .refreshToken(tokenMapping.getRefreshToken())
                 .userEmail(tokenMapping.getUserEmail())
                 .build();
+
         tokenRepository.save(token);
         AuthRes authResponse = AuthRes.builder().accessToken(tokenMapping.getAccessToken()).refreshToken(token.getRefreshToken()).build();
 
@@ -126,13 +127,14 @@ public class AuthService {
 
     @Transactional
     public ResponseEntity<?> signOut(RefreshTokenReq tokenRefreshRequest) {
-        boolean checkValid = valid(tokenRefreshRequest.getRefreshToken());
-        DefaultAssert.isAuthentication(checkValid);
 
-        //4 token 정보를 삭제한다.
         Optional<Token> token = tokenRepository.findByRefreshToken(tokenRefreshRequest.getRefreshToken());
+        DefaultAssert.isTrue(token.isPresent(), "이미 로그아웃 되었습니다.");
+
         tokenRepository.delete(token.get());
-        ApiResponse apiResponse = ApiResponse.builder().check(true).information(Message.builder().message("로그아웃 하였습니다.").build()).build();
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true).information(Message.builder().message("로그아웃 하였습니다.").build())
+                .build();
 
         return ResponseEntity.ok(apiResponse);
     }
