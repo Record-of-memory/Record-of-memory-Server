@@ -3,6 +3,8 @@ package com.rom.domain.comment.application;
 import com.rom.domain.comment.domain.Comment;
 import com.rom.domain.comment.domain.repository.CommentRepository;
 import com.rom.domain.comment.dto.DeleteCommentReq;
+import com.rom.domain.comment.dto.FindCommentReq;
+import com.rom.domain.comment.dto.FindCommentRes;
 import com.rom.domain.comment.dto.WriteCommentReq;
 import com.rom.domain.common.Status;
 import com.rom.domain.record.domain.Record;
@@ -19,7 +21,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -75,4 +79,36 @@ public class CommentService {
 
         return ResponseEntity.ok(apiResponse);
     }
+
+    //댓글 전체 조회 (댓글 버튼 눌렀을 때)
+    public ResponseEntity<?> findAllComments(UserPrincipal userPrincipal, FindCommentReq findCommentReq){
+
+        Optional<User> user = userRepository.findById(userPrincipal.getId());
+        DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다.");
+
+        List<Comment> comments = commentRepository.findAllByRecordId(findCommentReq.getRecordId());
+        List<FindCommentRes> findCommentRes = comments.stream()
+                .map(comment -> FindCommentRes.builder()
+                        .nickname(user.get().getNickname())
+                        .content(comment.getContent())
+                        .createdAt(comment.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(findCommentRes)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    //댓글 최신 2개 조회 (일기 밑에 보여지는 댓글)
+//    public ResponseEntity<?> findRecentComments(UserPrincipal userPrincipal, FindCommentReq findCommentReq) {
+//
+//        Optional<User> user = userRepository.findById(userPrincipal.getId());
+//        DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다.");
+//
+//
+//    }
 }
