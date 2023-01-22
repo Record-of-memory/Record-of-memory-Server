@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.rom.domain.common.BaseEntity;
@@ -59,6 +58,10 @@ public class User extends BaseEntity {
 
     public void updateImageUrl(String imageUrl){
         this.imageUrl = imageUrl;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
     }
 
 }
