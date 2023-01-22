@@ -12,5 +12,4 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     //작성 시간 기준 내림차순 조회
     List<Comment> findAllByRecordIdOrderByCreatedAtDesc(Long id);
 
-
 }

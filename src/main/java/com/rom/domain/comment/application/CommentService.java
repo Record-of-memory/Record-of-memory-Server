@@ -15,7 +15,9 @@ import com.rom.global.DefaultAssert;
 import com.rom.global.config.security.token.UserPrincipal;
 import com.rom.global.payload.ApiResponse;
 import com.rom.global.payload.Message;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -80,35 +82,38 @@ public class CommentService {
         return ResponseEntity.ok(apiResponse);
     }
 
-    //댓글 전체 조회 (댓글 버튼 눌렀을 때)
+    //댓글 전체 조회
     public ResponseEntity<?> findAllComments(UserPrincipal userPrincipal, FindCommentReq findCommentReq){
 
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다.");
 
-        List<Comment> comments = commentRepository.findAllByRecordId(findCommentReq.getRecordId());
+        List<Comment> comments = commentRepository.findAllByRecordIdOrderByCreatedAtDesc(findCommentReq.getRecordId());
         List<FindCommentRes> findCommentRes = comments.stream()
                 .map(comment -> FindCommentRes.builder()
                         .nickname(user.get().getNickname())
+                        .imageUrl(user.get().getImageUrl())
                         .content(comment.getContent())
                         .createdAt(comment.getCreatedAt())
                         .build())
                 .collect(Collectors.toList());
 
+        //댓글 조회할 때 댓글의 개수도 같이 넘겨주기 위해 클래스로 한 번 감싸서 데이터를 넣어줌
+        Result result = new Result(findCommentRes.size(), findCommentRes);
+
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
-                .information(findCommentRes)
+                .information(result)
                 .build();
 
         return ResponseEntity.ok(apiResponse);
     }
 
-    //댓글 최신 2개 조회 (일기 밑에 보여지는 댓글)
-//    public ResponseEntity<?> findRecentComments(UserPrincipal userPrincipal, FindCommentReq findCommentReq) {
-//
-//        Optional<User> user = userRepository.findById(userPrincipal.getId());
-//        DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다.");
-//
-//
-//    }
+    @Data
+    @AllArgsConstructor
+    static class Result {
+        private int count;    //댓글 개수
+        private List<FindCommentRes> data;
+    }
+
 }

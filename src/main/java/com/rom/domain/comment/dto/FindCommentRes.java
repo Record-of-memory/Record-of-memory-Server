@@ -13,6 +13,9 @@ public class FindCommentRes {
     @Schema(type = "String", example = "나나", description = "댓글 작성자의 닉네임입니다.")
     private String nickname;
 
+    @Schema(type = "String", example = "", description = "댓글 작성자의 프로필 사진 url입니다.")
+    private String imageUrl;
+
     @Schema(type = "String", example = "이렇게 일기에 댓글을 달 수 있구나!", description = "댓글의 내용입니다.")
     private String content;
 
@@ -20,8 +23,9 @@ public class FindCommentRes {
     private LocalDateTime createdAt;
 
     @Builder
-    public FindCommentRes(String nickname, String content, LocalDateTime createdAt) {
+    public FindCommentRes(String nickname, String imageUrl, String content, LocalDateTime createdAt) {
         this.nickname = nickname;
+        this.imageUrl = imageUrl;
         this.content = content;
         this.createdAt = createdAt;
     }
