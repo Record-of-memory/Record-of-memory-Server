@@ -3,16 +3,16 @@ package com.rom.domain.record.domain;
 import com.rom.domain.diary.domain.Diary;
 import com.rom.domain.user.domain.User;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 import java.util.Date;
 
-@Getter
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Builder
 public class Record {
 
     @Id
@@ -37,6 +37,7 @@ public class Record {
     @JoinColumn(name = "diary_book_id")
     private Diary diary;
 
+    @Column(length = 32, columnDefinition = "varchar(32) default 'active'")
     @Enumerated(EnumType.STRING)
     private RecordStatus recordStatus;
 
