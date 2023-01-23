@@ -16,16 +16,17 @@ import com.rom.global.config.security.token.UserPrincipal;
 import com.rom.global.payload.ApiResponse;
 import com.rom.global.payload.Message;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -81,6 +82,7 @@ public class CommentService {
 
         return ResponseEntity.ok(apiResponse);
     }
+
 
     //댓글 전체 조회
     public ResponseEntity<?> findAllComments(UserPrincipal userPrincipal, FindCommentReq findCommentReq){
