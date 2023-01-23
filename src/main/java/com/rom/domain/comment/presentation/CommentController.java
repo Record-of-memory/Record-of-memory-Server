@@ -3,6 +3,7 @@ package com.rom.domain.comment.presentation;
 
 import com.rom.domain.comment.application.CommentService;
 import com.rom.domain.comment.dto.DeleteCommentReq;
+
 import com.rom.domain.comment.dto.FindCommentReq;
 import com.rom.domain.comment.dto.WriteCommentReq;
 import com.rom.global.config.security.token.CurrentUser;
@@ -57,6 +58,7 @@ public class CommentController {
     ) {
         return commentService.deleteComment(userPrincipal, deleteCommentReq);
     }
+
     
     //댓글 조회
     @Operation(summary = "댓글 조회", description = "댓글을 조회합니다.")

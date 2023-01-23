@@ -18,14 +18,18 @@ import com.rom.global.payload.Message;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -82,6 +86,7 @@ public class CommentService {
         return ResponseEntity.ok(apiResponse);
     }
 
+
     //댓글 전체 조회
     public ResponseEntity<?> findAllComments(UserPrincipal userPrincipal, FindCommentReq findCommentReq){
 
@@ -115,5 +120,6 @@ public class CommentService {
         private int count;    //댓글 개수
         private List<FindCommentRes> data;
     }
+
 
 }
