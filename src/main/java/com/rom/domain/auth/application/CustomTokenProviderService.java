@@ -7,6 +7,7 @@ import com.rom.global.config.security.AuthConfig;
 import com.rom.global.config.security.token.UserPrincipal;
 import com.rom.domain.auth.dto.TokenMapping;
 
+import com.rom.global.error.DefaultException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
