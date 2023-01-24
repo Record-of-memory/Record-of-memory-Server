@@ -30,11 +30,11 @@ public class Record extends BaseEntity {
     private String imgUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "diary_book_id")
+    @JoinColumn(name = "diary_id")
     private Diary diary;
 
     @Enumerated(EnumType.STRING)
