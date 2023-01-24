@@ -1,19 +1,20 @@
 package com.rom.domain.record.domain;
 
+import com.rom.domain.common.BaseEntity;
+import com.rom.domain.common.Status;
 import com.rom.domain.diary.domain.Diary;
 import com.rom.domain.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Where;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Builder
-public class Record {
+@Getter
+@Setter
+public class Record extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +26,6 @@ public class Record {
 
     private String content;
 
-    // 이미지
     @Column(name="img_url")
     private String imgUrl;
 
@@ -37,22 +37,17 @@ public class Record {
     @JoinColumn(name = "diary_book_id")
     private Diary diary;
 
-    @Column(length = 32, columnDefinition = "varchar(32) default 'active'")
     @Enumerated(EnumType.STRING)
-    private RecordStatus recordStatus;
+    @Where(clause = "status = ACTIVE")
+    private Status status = Status.valueOf("ACTIVE");
 
-    @Column(name="created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name="updated_at")
-    private LocalDateTime updatedAt;
-
-
-    @PrePersist // DB에 insert 되기 직전에 실행
-    public void created_at(){
-        this.createdAt = LocalDateTime.now();
+    @Builder
+    public Record(User user, Diary diary, Date date, String title, String content){
+        this.user = user;
+        this.diary = diary;
+        this.date = date;
+        this.title = title;
+        this.content = content;
     }
 
-    @PreUpdate  // update 되기 직전 실행
-    public void updated_at() { this.updatedAt = LocalDateTime.now(); }
 }
