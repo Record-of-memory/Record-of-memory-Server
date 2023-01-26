@@ -43,11 +43,10 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x ./gradlew
       shell: bash
-        
+    
     - name: Build with Gradle
-      uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
-      with:
-        arguments: build
+      run: ./gradlew clean build -x test  # build 디렉토리 삭제 후 빌드
+      shell: bash
 
     # AWS 인증 (S3, CodeDeploy 권한을 가진 IAM 사용자 Access Key, Secret Key)
     - name: Configure AWS credentials
