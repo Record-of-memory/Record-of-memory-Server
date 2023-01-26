@@ -3,6 +3,7 @@ package com.rom.domain.user.application;
 import java.util.Optional;
 
 import com.rom.domain.auth.domain.repository.TokenRepository;
+import com.rom.domain.common.Status;
 import com.rom.domain.user.dto.ChangePasswordReq;
 import com.rom.domain.user.dto.UserDetailRes;
 import com.rom.global.DefaultAssert;
@@ -88,4 +89,21 @@ public class UserService {
 
         return ResponseEntity.ok(apiResponse);
     }
+
+    @Transactional
+    public ResponseEntity<?> deleteUser(UserPrincipal userPrincipal) {
+        Optional<User> user = userRepository.findById(userPrincipal.getId());
+        DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다");
+
+        User findUser = user.get();
+        findUser.updateStatus(Status.DELETE);
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(Message.builder().message("유저 탈퇴가 완료되었습니다").build())
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
 }
