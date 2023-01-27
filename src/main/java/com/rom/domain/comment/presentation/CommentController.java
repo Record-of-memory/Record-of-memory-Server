@@ -21,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
+
 @Tag(name = "Comments", description = "Comments API")
 @RestController
 @RequiredArgsConstructor
@@ -71,5 +73,4 @@ public class CommentController {
     ){
         return commentService.findAllComments(userPrincipal, findCommentReq);
     }
-
 }
