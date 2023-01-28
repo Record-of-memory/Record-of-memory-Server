@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 public class FindCommentRes {
 
-    @Schema(type = "String", example = "나나", description = "댓글 작성자의 닉네임입니다.")
+    @Schema(type = "String", example = "보라", description = "댓글 작성자의 닉네임입니다.")
     private String nickname;
 
     @Schema(type = "String", example = "", description = "댓글 작성자의 프로필 사진 url입니다.")

@@ -16,6 +16,7 @@ import org.hibernate.annotations.Where;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
+@Where(clause = "status = 'ACTIVE'")
 public class Comment extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,8 +34,11 @@ public class Comment extends BaseEntity {
     private Record record;
 
     @Enumerated(EnumType.STRING)
-    @Where(clause = "status = ACTIVE")
     private Status status = Status.ACTIVE;
+
+    public void updateStatus(Status status) {
+        this.status = status;
+    }
 
     @Builder
     public Comment(Long id, String content, User user, Record record) {

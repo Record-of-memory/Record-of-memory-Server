@@ -12,7 +12,7 @@ public class WriteCommentReq {
     @NotNull
     private Long recordId;
 
-    @Schema(type = "string", example = "첫 댓글", description = "댓글 내용")
+    @Schema(type = "string", example = "이렇게 일기에 댓글을 달 수 있구나!", description = "댓글 내용")
     @NotEmpty
     private String content;
 
