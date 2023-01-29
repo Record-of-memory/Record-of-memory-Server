@@ -41,6 +41,20 @@ public class RecordController {
         return recordService.getRecordsOfDiary(recordsByDiaryReq);
     }
 
+    // 일기 상세 조회
+    @Operation(summary = "일기 상세 조회", description = "원하는 일기의 내용을 상세하게 읽어옵니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "일기 상세 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))}),
+            @ApiResponse(responseCode = "400", description = "일기 상세 조회 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
+    @GetMapping("/detail")
+    public ResponseEntity<?> getRecordDetail(
+            @Parameter(description = "Schemas의 RecordDetailReq를 참고해주세요.", required = true) @Valid @RequestBody RecordDetailReq recordDetailReq
+            ){
+        return recordService.getRecordDetail(recordDetailReq);
+    }
+
+
     // 일기 작성
     @Operation(summary = "일기 작성", description = "일기룰 작성합니다.")
     @ApiResponses(value = {
