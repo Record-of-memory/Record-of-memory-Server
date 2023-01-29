@@ -79,36 +79,6 @@ public class RecordService {
         return ResponseEntity.ok(apiResponse);
     }
 
-    // [개발용] 전체 일기 조회
-    @Transactional
-    public ResponseEntity<?> getAllRecords(UserPrincipal userPrincipal) {
-
-        Optional<User> user = userRepository.findById(userPrincipal.getId());
-
-        List<Record> records = recordRepository.findAll();
-
-        List<RecordDetailRes> recordDetailRes = records.stream().map(
-                record -> RecordDetailRes.builder()
-                        .id(record.getId())
-                        .user(record.getUser().getNickname())
-                        .diary(record.getDiary().getName())
-                        .date(record.getDate())
-                        .content(record.getContent())
-                        .title(record.getTitle())
-                        .status(record.getStatus())
-                        .build()
-        ).toList();
-
-        ApiResponse apiResponse = ApiResponse.builder()
-            .check(true)
-            .information(recordDetailRes)
-            .build();
-
-        return ResponseEntity.ok(apiResponse);
-    }
-
-
-
     // 다이어리별 일기 조회
     @Transactional
     public ResponseEntity<?> getRecord() {
