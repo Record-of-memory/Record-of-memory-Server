@@ -1,6 +1,7 @@
 package com.rom.domain.comment.domain;
 
 import com.rom.domain.common.BaseEntity;
+import com.rom.domain.common.Status;
 import com.rom.domain.diary.domain.Diary;
 import com.rom.domain.record.domain.Record;
 import com.rom.domain.user.domain.User;
@@ -15,7 +16,7 @@ import org.hibernate.annotations.Where;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@Where(clause = "status = ACTIVE")
+@Where(clause = "status = 'ACTIVE'")
 public class Comment extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +32,13 @@ public class Comment extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "record_id")
     private Record record;
+
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.ACTIVE;
+
+    public void updateStatus(Status status) {
+        this.status = status;
+    }
 
     @Builder
     public Comment(Long id, String content, User user, Record record) {
