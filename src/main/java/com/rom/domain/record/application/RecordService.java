@@ -131,11 +131,27 @@ public class RecordService {
 
     // 다이어리 수정
     @Transactional
-    public ResponseEntity<?> getRecord() {
+    public ResponseEntity<?> updateRecord(UserPrincipal userPrincipal, UpdateRecordReq updateRecordReq) {
+
+        Optional<User> user = userRepository.findById(userPrincipal.getId());
+        DefaultAssert.isTrue(user.isPresent(), "올바른 유저가 아닙니다.");
+
+        Optional<Record> record = recordRepository.findById(updateRecordReq.getRecordId());
+        DefaultAssert.isTrue(record.isPresent(), "일기가 올바르지 않습니다.");
+
+        if (updateRecordReq.getDate() != null){
+            record.get().setDate(updateRecordReq.getDate());
+        }
+        if (updateRecordReq.getTitle() != null){
+            record.get().setTitle(updateRecordReq.getTitle());
+        }
+        if (updateRecordReq.getContent() != null){
+            record.get().setContent(updateRecordReq.getContent());
+        }
 
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
-                .information(Message.builder().message("해당 다이어리의 일기를 모두 읽어옵니다.").build())
+                .information(Message.builder().message("일기가 수정되었습니다.").build())
                 .build();
 
         return ResponseEntity.ok(apiResponse);
