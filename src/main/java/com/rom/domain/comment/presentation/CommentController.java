@@ -3,7 +3,6 @@ package com.rom.domain.comment.presentation;
 
 import com.rom.domain.comment.application.CommentService;
 import com.rom.domain.comment.dto.DeleteCommentReq;
-import com.rom.domain.comment.dto.FindCommentReq;
 import com.rom.domain.comment.dto.ResultCommentRes;
 import com.rom.domain.comment.dto.WriteCommentReq;
 import com.rom.global.config.security.token.CurrentUser;
@@ -67,11 +66,11 @@ public class CommentController {
             @ApiResponse(responseCode = "200", description = "댓글 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ResultCommentRes.class))}),
             @ApiResponse(responseCode = "400", description = "댓글 조회 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
-    @GetMapping
+    @GetMapping("/{id}")
     public ResponseEntity<?> findComments(
             @Parameter(description = "AccessToken을 입력해주세요", required = true) @CurrentUser UserPrincipal userPrincipal,
-            @Parameter(description = "Schemas의 FindCommentReq를 참고해주세요.", required = true) @Valid @RequestBody FindCommentReq findCommentReq
+            @Parameter(description = "일기의 id입니다.", required = true) @Valid @PathVariable("id") Long recordId
     ){
-        return commentService.findAllComments(userPrincipal, findCommentReq);
+        return commentService.findAllComments(userPrincipal, recordId);
     }
 }
