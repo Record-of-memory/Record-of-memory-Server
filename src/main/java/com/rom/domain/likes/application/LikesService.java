@@ -1,9 +1,11 @@
-package com.rom.domain.comment.application;
+package com.rom.domain.likes.application;
 
-import com.rom.domain.comment.domain.Comment;
-import com.rom.domain.comment.domain.repository.CommentRepository;
-import com.rom.domain.comment.dto.*;
 import com.rom.domain.common.Status;
+import com.rom.domain.likes.domain.Likes;
+import com.rom.domain.likes.domain.repository.LikesRepository;
+import com.rom.domain.likes.dto.CancelLikeReq;
+import com.rom.domain.likes.dto.LikeReq;
+import com.rom.domain.likes.dto.LikeRes;
 import com.rom.domain.record.domain.Record;
 import com.rom.domain.record.domain.repository.RecordRepository;
 import com.rom.domain.user.domain.User;
@@ -17,72 +19,65 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-
-@RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Service
-public class CommentService {
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+public class LikesService {
 
-    private final CommentRepository commentRepository;
+    private final LikesRepository likesRepository;
     private final UserRepository userRepository;
     private final RecordRepository recordRepository;
 
-
-    //댓글 작성
+    //좋아요
     @Transactional
-    public ResponseEntity<?> writeComment(UserPrincipal userPrincipal, WriteCommentReq writeCommentReq) {
+    public ResponseEntity<?> pressLike(UserPrincipal userPrincipal, LikeReq likeReq) {
 
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다.");
 
-        Optional<Record> record = recordRepository.findById(writeCommentReq.getRecordId());
+        Optional<Record> record = recordRepository.findById(likeReq.getRecordId());
         DefaultAssert.isTrue(record.isPresent(), "일기가 올바르지 않습니다.");
 
-        Comment comment = Comment.builder()
-                .content(writeCommentReq.getContent())
+        Likes likes = Likes.builder()
                 .user(user.get())
                 .record(record.get())
                 .build();
 
-        commentRepository.save(comment);
+        likesRepository.save(likes);
 
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
-                .information(Message.builder().message("댓글이 작성되었습니다.").build())
+                .information(Message.builder().message("좋아요").build())
                 .build();
 
         return ResponseEntity.ok(apiResponse);
     }
 
-
-    //댓글 삭제
+    //좋아요 취소
     @Transactional
-    public ResponseEntity<?> deleteComment(UserPrincipal userPrincipal, DeleteCommentReq deleteCommentReq) {
+    public ResponseEntity<?> cancelLike(UserPrincipal userPrincipal, CancelLikeReq likeReq) {
 
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다.");
 
-        Optional<Comment> comment = commentRepository.findById(deleteCommentReq.getCommentId());
-        DefaultAssert.isTrue(comment.isPresent(), "댓글이 올바르지 않습니다");
+        Optional<Likes> like = likesRepository.findById(likeReq.getLikeId());
+        DefaultAssert.isTrue(like.isPresent(), "좋아요가 올바르지 않습니다.");
 
-        comment.get().updateStatus(Status.DELETE);
+        likesRepository.delete(like.get());
 
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
-                .information(Message.builder().message("댓글이 삭제되었습니다.").build())
+                .information(Message.builder().message("좋아요 취소").build())
                 .build();
 
         return ResponseEntity.ok(apiResponse);
     }
 
-
-    //댓글 전체 조회
-    public ResponseEntity<?> findAllComments(UserPrincipal userPrincipal, Long recordId){
+    //좋아요 개수 조회
+    public ResponseEntity<?> findLikesCount(UserPrincipal userPrincipal, Long recordId) {
 
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다.");
@@ -90,27 +85,17 @@ public class CommentService {
         Optional<Record> record = recordRepository.findById(recordId);
         DefaultAssert.isTrue(record.isPresent(), "일기가 올바르지 않습니다.");
 
-        List<Comment> comments = commentRepository.findAllByRecordIdOrderByCreatedAtDesc(recordId);
-        List<FindCommentRes> findCommentRes = comments.stream()
-                .map(comment -> FindCommentRes.builder()
-                        .nickname(user.get().getNickname())
-                        .imageUrl(user.get().getImageUrl())
-                        .content(comment.getContent())
-                        .createdAt(comment.getCreatedAt())
-                        .build())
-                .collect(Collectors.toList());
+        List<Likes> likes = likesRepository.findAllByRecordId(recordId);
 
-        ResultCommentRes resultCommentRes = ResultCommentRes.builder()
-                .count(findCommentRes.size())
-                .data(findCommentRes)
+        LikeRes likeRes = LikeRes.builder()
+                .count(likes.size())
                 .build();
 
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
-                .information(resultCommentRes)
+                .information(likeRes)
                 .build();
 
         return ResponseEntity.ok(apiResponse);
     }
-
 }
