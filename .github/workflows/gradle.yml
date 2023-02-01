@@ -49,11 +49,11 @@ jobs:
         
         mkdir ./src/main/resources/database
         touch ./src/main/resources/database/application-database.yml
-        echo "${{ secrets.ENV_VARS_DB }}" >> src/main/resources/application-database.yml
+        echo "${{ secrets.ENV_VARS_DB }}" >> src/main/resources/database/application-database.yml
         
         mkdir ./src/main/resources/auth
         touch ./src/main/resources/auth/application-auth.yml
-        echo "${{ secrets.ENV_VARS_AUTH }}" >> src/main/resources/application-auth.yml
+        echo "${{ secrets.ENV_VARS_AUTH }}" >> src/main/resources/auth/application-auth.yml
         
 
     - name: Grant execute permission for gradlew
