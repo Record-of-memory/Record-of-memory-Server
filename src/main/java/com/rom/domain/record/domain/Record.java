@@ -42,12 +42,13 @@ public class Record extends BaseEntity {
     private Status status = Status.valueOf("ACTIVE");
 
     @Builder
-    public Record(User user, Diary diary, Date date, String title, String content){
+    public Record(User user, Diary diary, Date date, String title, String content, String imgUrl){
         this.user = user;
         this.diary = diary;
         this.date = date;
         this.title = title;
         this.content = content;
+        this.imgUrl = imgUrl;
     }
 
 }
