@@ -55,9 +55,10 @@ public class RecordController {
         return recordService.getRecord();
     }
 
-    // 일기 작성 - 글 작성 + 사진
-    // img 업로드 기능 추가
-    @Operation(summary = "일기 작성", description = "일기룰 작성합니다.")
+    /*
+     * 이미지 포함된 다이어리 작성
+     * */
+    @Operation(summary = "일기 작성(이미지 포함)", description = "일기를 작성합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "일기 작성 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))}),
             @ApiResponse(responseCode = "400", description = "일기 작성 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
@@ -69,12 +70,24 @@ public class RecordController {
             @Parameter(description = "img의 url") @RequestPart(value = "img") MultipartFile img
             ) throws IOException {
         // img 파라미터 추가
-        return recordService.writeRecord(userPrincipal, writeRecordReq, img);
+        return recordService.writeRecordWithImg(userPrincipal, writeRecordReq, img);
     }
 
     /*
-    * 이미지 없이 다이어리만 업로드하는 컨트롤러
-    * */
+     * 이미지 없이 업로드하는 컨트롤러
+     * */
+    @Operation(summary = "일기 작성(이미지 없는, content 만 있는)", description = "일기를 작성합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "일기 작성 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))}),
+            @ApiResponse(responseCode = "400", description = "일기 작성 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
+    @PostMapping("/no-img")
+    public ResponseEntity<?> writeRecord(
+            @Parameter(description = "AccessToken을 입력해주세요", required = true) @CurrentUser UserPrincipal userPrincipal,
+            @Parameter(description = "Schemas의 WriteRecordReq를 참고해주세요.") @Valid @RequestBody WriteRecordReq writeRecordReq
+    ){
+        return recordService.writeRecord(userPrincipal, writeRecordReq);
+    }
 
     // 일기 삭제
     @Operation(summary = "일기 삭제", description = "일기를 삭제합니다.")

@@ -38,7 +38,7 @@ public class RecordService {
     // 일기 작성
     // img 업로드 추가
     @Transactional
-    public ResponseEntity<?> writeRecord(UserPrincipal userPrincipal, WriteRecordReq writeRecordReq, MultipartFile img) throws IOException {
+    public ResponseEntity<?> writeRecordWithImg(UserPrincipal userPrincipal, WriteRecordReq writeRecordReq, MultipartFile img) throws IOException {
 
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         DefaultAssert.isTrue(user.isPresent(), "올바른 유저가 아닙니다.");
@@ -60,6 +60,34 @@ public class RecordService {
             String storedFileName = s3Uploader.upload(img, "record_img");
             record.setImgUrl(storedFileName);
         }
+
+        recordRepository.save(record);
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(Message.builder().message("일기가 작성되었습니다.").build())
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    // 일기 작성
+    @Transactional
+    public ResponseEntity<?> writeRecord(UserPrincipal userPrincipal, WriteRecordReq writeRecordReq) {
+
+        Optional<User> user = userRepository.findById(userPrincipal.getId());
+        DefaultAssert.isTrue(user.isPresent(), "올바른 유저가 아닙니다.");
+
+        Optional<Diary> diary = diaryRepository.findById(writeRecordReq.getDiaryId());
+        DefaultAssert.isTrue(diary.isPresent(), "다이어리가 올바르지 않습니다.");
+
+        Record record = Record.builder()
+                .diary(diary.get())
+                .date(writeRecordReq.getDate())
+                .title(writeRecordReq.getTitle())
+                .content(writeRecordReq.getContent())
+                .user(user.get())
+                .build();
 
         recordRepository.save(record);
 
