@@ -113,11 +113,11 @@ public class DiaryService {
     }
 
     @Transactional
-    public ResponseEntity<?> leaveDiary(UserPrincipal userPrincipal, LeaveDiaryReq leaveDiaryReq) {
+    public ResponseEntity<?> leaveDiary(UserPrincipal userPrincipal, Long diaryId) {
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다");
 
-        Optional<Diary> diary = diaryRepository.findById(leaveDiaryReq.getDiaryId());
+        Optional<Diary> diary = diaryRepository.findById(diaryId);
         DefaultAssert.isTrue(diary.isPresent(), "다이어리가 올바르지 않습니다.");
 
         Optional<UserDiary> userDiary = userDiaryRepository.findUserDiaryByUserAndDiary(user.get(), diary.get());
@@ -137,8 +137,8 @@ public class DiaryService {
         return ResponseEntity.ok(apiResponse);
     }
 
-    public ResponseEntity<?> findUsersByDiaryId(Long diaryId) {
-        List<User> users = userDiaryRepository.findAllByDiaryId(diaryId).stream()
+    public ResponseEntity<?> findUsersByDiaryId(Long id) {
+        List<User> users = userDiaryRepository.findAllByDiaryId(id).stream()
                 .map(UserDiary::getUser)
                 .toList();
 
