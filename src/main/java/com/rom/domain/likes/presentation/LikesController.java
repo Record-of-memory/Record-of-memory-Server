@@ -49,7 +49,7 @@ public class LikesController {
             @ApiResponse(responseCode = "201", description = "좋아요 취소 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))}),
             @ApiResponse(responseCode = "400", description = "좋아요 취소 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
-    @PatchMapping
+    @DeleteMapping
     public ResponseEntity<?> cancelLike(
             @Parameter(description = "AccessToken을 입력해주세요", required = true) @CurrentUser UserPrincipal userPrincipal,
             @Parameter(description = "Schemas의 CancelLikeReq를 참고해주세요.", required = true) @Valid @RequestBody CancelLikeReq likeReq
