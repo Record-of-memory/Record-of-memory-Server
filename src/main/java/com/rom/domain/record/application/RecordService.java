@@ -7,6 +7,7 @@ import com.rom.domain.record.domain.Record;
 import com.rom.domain.record.domain.repository.RecordRepository;
 import com.rom.domain.record.dto.DeleteRecordReq;
 import com.rom.domain.record.dto.RecordDetailRes;
+import com.rom.domain.record.dto.WriteRecordNoImgReq;
 import com.rom.domain.record.dto.WriteRecordReq;
 import com.rom.domain.user.domain.User;
 import com.rom.domain.user.domain.repository.UserRepository;
@@ -73,7 +74,7 @@ public class RecordService {
 
     // 일기 작성
     @Transactional
-    public ResponseEntity<?> writeRecord(UserPrincipal userPrincipal, WriteRecordReq writeRecordReq) {
+    public ResponseEntity<?> writeRecord(UserPrincipal userPrincipal, WriteRecordNoImgReq writeRecordReq) {
 
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         DefaultAssert.isTrue(user.isPresent(), "올바른 유저가 아닙니다.");

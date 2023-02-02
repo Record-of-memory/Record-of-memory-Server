@@ -7,8 +7,8 @@ import lombok.Data;
 
 import java.util.Date;
 
-@Data   // 이미지 포함하는 경우
-public class WriteRecordReq {
+@Data   // 이미지 포함 X -> content 필수
+public class WriteRecordNoImgReq {
 
     @Schema(type = "Long", example = "1", description = "일기를 작성할 다이어리의 ID")
     @NotNull
@@ -23,6 +23,7 @@ public class WriteRecordReq {
     private String title;
 
     @Schema(type = "string", example = "하남 갈 일이 있어서 가족들이랑 하남 갔다가 짱 예쁜 핑크뮬리 보고왔다.", description = "일기 내용")
+    @NotNull
     private String content;
 
 }

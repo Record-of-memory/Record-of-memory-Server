@@ -4,6 +4,7 @@ import com.rom.domain.comment.dto.DeleteCommentReq;
 import com.rom.domain.record.application.RecordService;
 import com.rom.domain.record.application.S3Uploader;
 import com.rom.domain.record.dto.DeleteRecordReq;
+import com.rom.domain.record.dto.WriteRecordNoImgReq;
 import com.rom.domain.record.dto.WriteRecordReq;
 import com.rom.global.config.security.token.CurrentUser;
 import com.rom.global.config.security.token.UserPrincipal;
@@ -84,7 +85,7 @@ public class RecordController {
     @PostMapping("/no-img")
     public ResponseEntity<?> writeRecord(
             @Parameter(description = "AccessToken을 입력해주세요", required = true) @CurrentUser UserPrincipal userPrincipal,
-            @Parameter(description = "Schemas의 WriteRecordReq를 참고해주세요.") @Valid @RequestBody WriteRecordReq writeRecordReq
+            @Parameter(description = "Schemas의 WriteRecordReq를 참고해주세요.") @Valid @RequestBody WriteRecordNoImgReq writeRecordReq
     ){
         return recordService.writeRecord(userPrincipal, writeRecordReq);
     }
