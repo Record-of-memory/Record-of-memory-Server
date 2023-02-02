@@ -12,6 +12,7 @@ import com.rom.domain.diary.dto.InviteUserReq;
 import com.rom.domain.diary.dto.LeaveDiaryReq;
 import com.rom.domain.user.domain.User;
 import com.rom.domain.user.domain.repository.UserRepository;
+import com.rom.domain.user.dto.UserDetailRes;
 import com.rom.global.DefaultAssert;
 import com.rom.global.config.security.token.UserPrincipal;
 import com.rom.global.payload.ApiResponse;
@@ -65,7 +66,11 @@ public class DiaryService {
                 .toList();
 
         List<DiaryDetailRes> diaryDetailRes = diaries.stream()
-                .map(diary -> DiaryDetailRes.builder().id(diary.getId()).name(diary.getName()).diaryType(diary.getDiaryType().toString()).build())
+                .map(diary -> DiaryDetailRes.builder()
+                        .id(diary.getId())
+                        .name(diary.getName())
+                        .diaryType(diary.getDiaryType().toString())
+                        .build())
                 .toList();
 
         ApiResponse apiResponse = ApiResponse.builder()
@@ -127,6 +132,27 @@ public class DiaryService {
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
                 .information(Message.builder().message("다이어리 나가기가 완료되었습니다.").build())
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    public ResponseEntity<?> findUsersByDiaryId(Long diaryId) {
+        List<User> users = userDiaryRepository.findAllByDiaryId(diaryId).stream()
+                .map(UserDiary::getUser)
+                .toList();
+
+        List<UserDetailRes> userDetailRes = users.stream()
+                .map(user -> UserDetailRes.builder()
+                        .email(user.getEmail())
+                        .nickname(user.getNickname())
+                        .imageUrl(user.getImageUrl())
+                        .build())
+                .toList();
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(userDetailRes)
                 .build();
 
         return ResponseEntity.ok(apiResponse);

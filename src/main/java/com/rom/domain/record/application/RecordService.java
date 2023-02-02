@@ -5,10 +5,7 @@ import com.rom.domain.diary.domain.Diary;
 import com.rom.domain.diary.domain.repository.DiaryRepository;
 import com.rom.domain.record.domain.Record;
 import com.rom.domain.record.domain.repository.RecordRepository;
-import com.rom.domain.record.dto.DeleteRecordReq;
-import com.rom.domain.record.dto.RecordDetailRes;
-import com.rom.domain.record.dto.WriteRecordNoImgReq;
-import com.rom.domain.record.dto.WriteRecordReq;
+import com.rom.domain.record.dto.*;
 import com.rom.domain.user.domain.User;
 import com.rom.domain.user.domain.repository.UserRepository;
 import com.rom.global.DefaultAssert;
@@ -120,13 +117,12 @@ public class RecordService {
         return ResponseEntity.ok(apiResponse);
     }
 
-    // [개발용] 전체 일기 조회
-    @Transactional
-    public ResponseEntity<?> getAllRecords(UserPrincipal userPrincipal) {
+    // 다이어리별 일기 조회
+    public ResponseEntity<?> getRecordsOfDiary(RecordsByDiaryReq recordsByDiaryReq) {
 
-        Optional<User> user = userRepository.findById(userPrincipal.getId());
-
-        List<Record> records = recordRepository.findAll();
+        Optional<Diary> diary = diaryRepository.findById(recordsByDiaryReq.getDiaryId());
+        System.out.println(diary.get());
+        List<Record> records = recordRepository.findAllByDiary(diary.get());
 
         List<RecordDetailRes> recordDetailRes = records.stream().map(
                 record -> RecordDetailRes.builder()
@@ -140,23 +136,62 @@ public class RecordService {
                         .build()
         ).toList();
 
+
         ApiResponse apiResponse = ApiResponse.builder()
-            .check(true)
-            .information(recordDetailRes)
-            .build();
+                .check(true)
+                .information(recordDetailRes)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    // 개별 일기 상세 조회
+    public ResponseEntity<?> getRecordDetail(RecordDetailReq recordDetailReq) {
+
+        Optional<Record> record = recordRepository.findById(recordDetailReq.getRecordId());
+
+        RecordDetailRes recordDetailRes = RecordDetailRes.builder()
+                .id(record.get().getId())
+                .user(record.get().getUser().getNickname())
+                .diary(record.get().getDiary().getName())
+                .date(record.get().getDate())
+                .content(record.get().getContent())
+                .title(record.get().getTitle())
+                .status(record.get().getStatus())
+                .build();
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(recordDetailRes)
+                .build();
 
         return ResponseEntity.ok(apiResponse);
     }
 
 
-
-    // 다이어리별 일기 조회
+    // 다이어리 수정
     @Transactional
-    public ResponseEntity<?> getRecord() {
+    public ResponseEntity<?> updateRecord(UserPrincipal userPrincipal, UpdateRecordReq updateRecordReq) {
+
+        Optional<User> user = userRepository.findById(userPrincipal.getId());
+        DefaultAssert.isTrue(user.isPresent(), "올바른 유저가 아닙니다.");
+
+        Optional<Record> record = recordRepository.findById(updateRecordReq.getRecordId());
+        DefaultAssert.isTrue(record.isPresent(), "일기가 올바르지 않습니다.");
+
+        if (updateRecordReq.getDate() != null){
+            record.get().setDate(updateRecordReq.getDate());
+        }
+        if (updateRecordReq.getTitle() != null){
+            record.get().setTitle(updateRecordReq.getTitle());
+        }
+        if (updateRecordReq.getContent() != null){
+            record.get().setContent(updateRecordReq.getContent());
+        }
 
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
-                .information(Message.builder().message("해당 다이어리의 일기를 모두 읽어옵니다.").build())
+                .information(Message.builder().message("일기가 수정되었습니다.").build())
                 .build();
 
         return ResponseEntity.ok(apiResponse);
