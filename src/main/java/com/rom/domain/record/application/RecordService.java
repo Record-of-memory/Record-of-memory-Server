@@ -16,7 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,13 +27,51 @@ import java.util.Optional;
 @Service
 public class RecordService {
 
+    // 의존성 주입
     private final UserRepository userRepository;
     private final DiaryRepository diaryRepository;
     private final RecordRepository recordRepository;
+    private final S3Uploader s3Uploader;
+
+    // 일기 작성
+    // img 업로드 추가
+    @Transactional
+    public ResponseEntity<?> writeRecordWithImg(UserPrincipal userPrincipal, WriteRecordReq writeRecordReq, MultipartFile img) throws IOException {
+
+        Optional<User> user = userRepository.findById(userPrincipal.getId());
+        DefaultAssert.isTrue(user.isPresent(), "올바른 유저가 아닙니다.");
+
+        Optional<Diary> diary = diaryRepository.findById(writeRecordReq.getDiaryId());
+        DefaultAssert.isTrue(diary.isPresent(), "다이어리가 올바르지 않습니다.");
+
+        Record record = Record.builder()
+                .diary(diary.get())
+                .date(writeRecordReq.getDate())
+                .title(writeRecordReq.getTitle())
+                .content(writeRecordReq.getContent())
+                .user(user.get())
+                .build();
+
+        // img가 비어있는지 체크
+        // 업로드할 디렉토리 이름 설정 (record의 이미지는 record_img, 프로필의 이미지는 profile_img
+        if (!img.isEmpty()){
+            String storedFileName = s3Uploader.upload(img, "record_img");
+            record.setImgUrl(storedFileName);
+        }
+
+        recordRepository.save(record);
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(Message.builder().message("일기가 작성되었습니다.").build())
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
 
     // 일기 작성
     @Transactional
-    public ResponseEntity<?> writeRecord(UserPrincipal userPrincipal, WriteRecordReq writeRecordReq) {
+    public ResponseEntity<?> writeRecord(UserPrincipal userPrincipal, WriteRecordNoImgReq writeRecordReq) {
 
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         DefaultAssert.isTrue(user.isPresent(), "올바른 유저가 아닙니다.");
