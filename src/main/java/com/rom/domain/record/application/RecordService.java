@@ -139,6 +139,7 @@ public class RecordService {
                         .content(record.getContent())
                         .title(record.getTitle())
                         .status(record.getStatus())
+                        .imgUrl(record.getImgUrl())
                         .likeCnt(likeCount(record.getId()))
                         .cmtCnt(commentCount(record.getId()))
                         .build()
@@ -168,12 +169,11 @@ public class RecordService {
                         .content(record.getContent())
                         .title(record.getTitle())
                         .status(record.getStatus())
+                        .imgUrl(record.getImgUrl())
                         .likeCnt(likeCount(record.getId()))
                         .cmtCnt(commentCount(record.getId()))
                         .build()
         ).toList();
-
-
 
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
@@ -198,6 +198,7 @@ public class RecordService {
                         .content(record.getContent())
                         .title(record.getTitle())
                         .status(record.getStatus())
+                        .imgUrl(record.getImgUrl())
                         .likeCnt(likeCount(record.getId()))
                         .cmtCnt(commentCount(record.getId()))
                         .build()
@@ -224,6 +225,7 @@ public class RecordService {
                 .content(record.get().getContent())
                 .title(record.get().getTitle())
                 .status(record.get().getStatus())
+                .imgUrl(record.get().getImgUrl())
                 .likeCnt(likeCount(record.get().getId()))
                 .cmtCnt(commentCount(record.get().getId()))
                 .build();

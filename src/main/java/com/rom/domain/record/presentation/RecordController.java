@@ -62,7 +62,6 @@ public class RecordController {
     })
     @GetMapping("/date")
     public ResponseEntity<?> getRecordsOfDiaryByDate(
-//            @Parameter(description = "다이어리의 id입니다.", required = true) @Valid @PathVariable("diaryId") Long diaryId,
             @Parameter(description = "Schemas의 RecordDateReq를 참고해주세요.", required = true) @Valid @RequestBody RecordDateReq recordDateReq
     ){
         return recordService.getRecordsOfDiaryByDate(recordDateReq);
@@ -102,18 +101,18 @@ public class RecordController {
     /*
      * 이미지 없이 업로드하는 컨트롤러
      * */
-    @Operation(summary = "일기 작성(이미지 없는, content 만 있는)", description = "일기를 작성합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "일기 작성 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))}),
-            @ApiResponse(responseCode = "400", description = "일기 작성 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
-    })
-    @PostMapping("/no-img")
-    public ResponseEntity<?> writeRecord(
-            @Parameter(description = "AccessToken을 입력해주세요", required = true) @CurrentUser UserPrincipal userPrincipal,
-            @Parameter(description = "Schemas의 WriteRecordReq를 참고해주세요.") @Valid @RequestBody WriteRecordNoImgReq writeRecordReq
-    ){
-        return recordService.writeRecord(userPrincipal, writeRecordReq);
-    }
+//    @Operation(summary = "일기 작성(이미지 없는, content 만 있는)", description = "일기를 작성합니다.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "201", description = "일기 작성 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))}),
+//            @ApiResponse(responseCode = "400", description = "일기 작성 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+//    })
+//    @PostMapping("/no-img")
+//    public ResponseEntity<?> writeRecord(
+//            @Parameter(description = "AccessToken을 입력해주세요", required = true) @CurrentUser UserPrincipal userPrincipal,
+//            @Parameter(description = "Schemas의 WriteRecordReq를 참고해주세요.") @Valid @RequestBody WriteRecordNoImgReq writeRecordReq
+//    ){
+//        return recordService.writeRecord(userPrincipal, writeRecordReq);
+//    }
 
     // 일기 삭제
     @Operation(summary = "일기 삭제", description = "일기를 삭제합니다.")
