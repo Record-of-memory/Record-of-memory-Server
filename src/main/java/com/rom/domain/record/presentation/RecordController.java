@@ -55,15 +55,14 @@ public class RecordController {
     }
 
     // 다이어리 내 날쩌별 일기 조회
-    @Operation(summary = "날짜별 일기 조회", description = "요청받은 다이어리의 일기를 모두 읽어옵니다.")
+    @Operation(summary = "날짜별 일기 조회", description = "다이어리 내 해당 일자의 일기를 모두 읽어옵니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "다이어리별 일기 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RecordDetailRes.class))}),
+            @ApiResponse(responseCode = "200", description = "다이어리별 일기 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RecordDateReq.class))}),
             @ApiResponse(responseCode = "400", description = "다이어리별 일기 조회 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
     @GetMapping("/date")
     public ResponseEntity<?> getRecordsOfDiaryByDate(
-            @Parameter(description = "Schemas의 RecordDateReq를 참고해주세요.", required = true) @Valid @RequestBody RecordDateReq recordDateReq
-    ){
+            @Parameter(description = "Schemas의 RecordDateReq를 참고해주세요.", required = true) @Valid @RequestBody RecordDateReq recordDateReq){
         return recordService.getRecordsOfDiaryByDate(recordDateReq);
     }
 
