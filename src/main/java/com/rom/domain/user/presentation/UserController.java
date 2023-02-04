@@ -2,7 +2,6 @@ package com.rom.domain.user.presentation;
 
 import com.rom.domain.user.application.UserService;
 import com.rom.domain.user.dto.ChangePasswordReq;
-import com.rom.domain.user.dto.UpdateProfileReq;
 import com.rom.domain.user.dto.UserDetailRes;
 import com.rom.global.config.security.token.CurrentUser;
 import com.rom.global.config.security.token.UserPrincipal;
@@ -81,8 +80,20 @@ public class UserController {
             @Parameter(description = "닉네임을 입력해주세요.", required = true) @Valid @RequestPart String nickname,
             @Parameter(description = "이미지를 업로드해주세요.") @RequestPart(required = false) MultipartFile profileImg
 
-            ) throws IOException {
+    ) throws IOException {
         return userService.updateProfile(userPrincipal, nickname, profileImg);
+    }
+
+    @Operation(summary = "유저 탈퇴")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "유저가 탈퇴되었습니다.", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))}),
+            @ApiResponse(responseCode = "400", description = "유저 탈퇴에 실패했습니다.", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
+    @DeleteMapping("/me")
+    public ResponseEntity<?> deleteUser(
+            @Parameter(description = "AccessToken을 입력해주세요", required = true) @CurrentUser UserPrincipal userPrincipal
+    ) {
+        return userService.deleteUser(userPrincipal);
     }
 
 }
