@@ -1,8 +1,13 @@
 package com.rom.domain.record.application;
 
+import com.rom.domain.comment.domain.Comment;
+import com.rom.domain.comment.domain.repository.CommentRepository;
 import com.rom.domain.common.Status;
 import com.rom.domain.diary.domain.Diary;
 import com.rom.domain.diary.domain.repository.DiaryRepository;
+import com.rom.domain.likes.domain.Likes;
+import com.rom.domain.likes.domain.repository.LikesRepository;
+import com.rom.domain.likes.dto.LikeRes;
 import com.rom.domain.record.domain.Record;
 import com.rom.domain.record.domain.repository.RecordRepository;
 import com.rom.domain.record.dto.*;
@@ -31,6 +36,8 @@ public class RecordService {
     private final UserRepository userRepository;
     private final DiaryRepository diaryRepository;
     private final RecordRepository recordRepository;
+    private final LikesRepository likesRepository;
+    private final CommentRepository commentRepository;
     private final S3Uploader s3Uploader;
 
     // 일기 작성
@@ -121,7 +128,6 @@ public class RecordService {
     public ResponseEntity<?> getRecordsOfDiary(RecordsByDiaryReq recordsByDiaryReq) {
 
         Optional<Diary> diary = diaryRepository.findById(recordsByDiaryReq.getDiaryId());
-        System.out.println(diary.get());
         List<Record> records = recordRepository.findAllByDiary(diary.get());
 
         List<RecordDetailRes> recordDetailRes = records.stream().map(
@@ -133,6 +139,8 @@ public class RecordService {
                         .content(record.getContent())
                         .title(record.getTitle())
                         .status(record.getStatus())
+                        .likeCnt(likeCount(record.getId()))
+                        .cmtCnt(commentCount(record.getId()))
                         .build()
         ).toList();
 
@@ -158,6 +166,8 @@ public class RecordService {
                 .content(record.get().getContent())
                 .title(record.get().getTitle())
                 .status(record.get().getStatus())
+                .likeCnt(likeCount(record.get().getId()))
+                .cmtCnt(commentCount(record.get().getId()))
                 .build();
 
         ApiResponse apiResponse = ApiResponse.builder()
@@ -197,6 +207,14 @@ public class RecordService {
         return ResponseEntity.ok(apiResponse);
     }
 
+    public int likeCount(Long id){
+        List<Likes> likes = likesRepository.findAllByRecordId(id);
+        return likes.size();
+    }
 
+    public int commentCount(Long id){
+        List<Comment> comments = commentRepository.findAllByRecordId(id);
+        return comments.size();
+    }
 
 }
