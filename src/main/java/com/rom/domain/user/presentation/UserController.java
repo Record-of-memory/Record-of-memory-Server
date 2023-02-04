@@ -63,4 +63,16 @@ public class UserController {
     ) {
         return userService.changePassword(userPrincipal, changePasswordReq);
     }
+
+    @Operation(summary = "유저 탈퇴", description = "유저를 탈퇴합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "유저가 탈퇴되었습니다.", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))}),
+            @ApiResponse(responseCode = "400", description = "유저 탈퇴를 실패했습니다.", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
+    @DeleteMapping("/me")
+    public ResponseEntity<?> deleteUser(
+            @Parameter(description = "AccessToken을 Authorization 헤더로 보내주세요.", required = true) @CurrentUser UserPrincipal userPrincipal
+    ) {
+        return userService.deleteUser(userPrincipal);
+    }
 }
