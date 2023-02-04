@@ -58,9 +58,9 @@ public class DiaryController {
             @ApiResponse(responseCode = "200", description = "다이어리의 유저 목록 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = DiaryDetailRes.class))}),
             @ApiResponse(responseCode = "400", description = "다이어리의 유저 목록 조회 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
-    @GetMapping("{diaryId}")
+    @GetMapping("{id}")
     public ResponseEntity<?> findUsersByDiary(
-            @Parameter(description = "Diary ID를 입력해주세요", required = true) @PathVariable Long diaryId
+            @Parameter(description = "Diary ID를 입력해주세요", required = true) @PathVariable(value = "id") Long diaryId
     ){
         return diaryService.findUsersByDiaryId(diaryId);
     }
