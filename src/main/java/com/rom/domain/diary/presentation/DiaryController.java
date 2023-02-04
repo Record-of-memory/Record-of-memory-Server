@@ -4,7 +4,6 @@ import com.rom.domain.diary.application.DiaryService;
 import com.rom.domain.diary.dto.CreateDiaryReq;
 import com.rom.domain.diary.dto.DiaryDetailRes;
 import com.rom.domain.diary.dto.InviteUserReq;
-import com.rom.domain.diary.dto.LeaveDiaryReq;
 import com.rom.global.config.security.token.CurrentUser;
 import com.rom.global.config.security.token.UserPrincipal;
 import com.rom.global.payload.ErrorResponse;
@@ -59,9 +58,9 @@ public class DiaryController {
             @ApiResponse(responseCode = "200", description = "다이어리의 유저 목록 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = DiaryDetailRes.class))}),
             @ApiResponse(responseCode = "400", description = "다이어리의 유저 목록 조회 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
-    @GetMapping("{diaryId}")
+    @GetMapping("{id}")
     public ResponseEntity<?> findUsersByDiary(
-            @Parameter(description = "Diary ID를 입력해주세요", required = true) @PathVariable Long diaryId
+            @Parameter(description = "Diary ID를 입력해주세요", required = true) @PathVariable(value = "id") Long diaryId
     ){
         return diaryService.findUsersByDiaryId(diaryId);
     }
@@ -83,12 +82,12 @@ public class DiaryController {
             @ApiResponse(responseCode = "200", description = "다이어리 나가기 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))}),
             @ApiResponse(responseCode = "400", description = "다이어리 나가기 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
-    @DeleteMapping
+    @DeleteMapping("{id}")
     public ResponseEntity<?> leaveDiary(
             @Parameter(description = "AccessToken을 입력해주세요", required = true) @CurrentUser UserPrincipal userPrincipal,
-            @Parameter(description = "Schemas의 LeaveDiaryReq를 참고해주세요.", required = true) @Valid @RequestBody LeaveDiaryReq leaveDiaryReq
+            @Parameter(description = "{id}에 다이어리 아이디를 입력해주세요.", required = true) @PathVariable(value = "id") Long diaryId
             ){
-        return diaryService.leaveDiary(userPrincipal, leaveDiaryReq);
+        return diaryService.leaveDiary(userPrincipal, diaryId);
     }
 
 }

@@ -9,7 +9,6 @@ import com.rom.domain.diary.domain.repository.UserDiaryRepository;
 import com.rom.domain.diary.dto.CreateDiaryReq;
 import com.rom.domain.diary.dto.DiaryDetailRes;
 import com.rom.domain.diary.dto.InviteUserReq;
-import com.rom.domain.diary.dto.LeaveDiaryReq;
 import com.rom.domain.user.domain.User;
 import com.rom.domain.user.domain.repository.UserRepository;
 import com.rom.domain.user.dto.UserDetailRes;
@@ -113,11 +112,11 @@ public class DiaryService {
     }
 
     @Transactional
-    public ResponseEntity<?> leaveDiary(UserPrincipal userPrincipal, LeaveDiaryReq leaveDiaryReq) {
+    public ResponseEntity<?> leaveDiary(UserPrincipal userPrincipal, Long diaryId) {
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다");
 
-        Optional<Diary> diary = diaryRepository.findById(leaveDiaryReq.getDiaryId());
+        Optional<Diary> diary = diaryRepository.findById(diaryId);
         DefaultAssert.isTrue(diary.isPresent(), "다이어리가 올바르지 않습니다.");
 
         Optional<UserDiary> userDiary = userDiaryRepository.findUserDiaryByUserAndDiary(user.get(), diary.get());
