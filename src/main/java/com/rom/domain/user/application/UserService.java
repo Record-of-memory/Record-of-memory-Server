@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 import com.rom.domain.auth.domain.repository.TokenRepository;
+import com.rom.domain.common.Status;
 import com.rom.domain.user.dto.ChangePasswordReq;
 import com.rom.domain.user.dto.UpdateProfileReq;
 import com.rom.domain.user.dto.UserDetailRes;
