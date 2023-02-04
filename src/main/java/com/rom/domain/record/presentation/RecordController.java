@@ -43,15 +43,15 @@ public class RecordController {
     }
 
     // 다이어리 내 유저별 일기 조회
-    @Operation(summary = "다이어리별 일기 조회", description = "요청받은 다이어리의 일기를 모두 읽어옵니다.")
+    @Operation(summary = "유저별 일기 조회", description = "다이어리 내 해당 유저의 일기를 모두 읽어옵니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "다이어리별 일기 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RecordDetailRes.class))}),
+            @ApiResponse(responseCode = "200", description = "다이어리별 일기 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RecordsByUserReq.class))}),
             @ApiResponse(responseCode = "400", description = "다이어리별 일기 조회 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
     @GetMapping("/user")
     public ResponseEntity<?> getRecordsOfDiaryByUser(
-            @Parameter(description = "다이어리의 id입니다.", required = true) @Valid @PathVariable("diaryId") Long diaryId){
-        return recordService.getRecordsOfDiaryByUser(diaryId);
+            @Parameter(description = "Schemas의 RecordsByUserReq를 참고해주세요.", required = true) @Valid @RequestBody RecordsByUserReq recordsByUserReq){
+        return recordService.getRecordsOfDiaryByUser(recordsByUserReq);
     }
 
     // 다이어리 내 날쩌별 일기 조회

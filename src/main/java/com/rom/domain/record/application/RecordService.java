@@ -16,7 +16,6 @@ import com.rom.global.DefaultAssert;
 import com.rom.global.config.security.token.UserPrincipal;
 import com.rom.global.payload.ApiResponse;
 import com.rom.global.payload.Message;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -155,10 +154,11 @@ public class RecordService {
     }
 
     // 다이어리별 일기 조회(유저별)
-    public ResponseEntity<?> getRecordsOfDiaryByUser(Long diaryId) {
+    public ResponseEntity<?> getRecordsOfDiaryByUser(RecordsByUserReq recordsByUserReq) {
 
-        Optional<Diary> diary = diaryRepository.findById(diaryId);
-        List<Record> records = recordRepository.findAllByDiary(diary.get());
+        Optional<Diary> diary = diaryRepository.findById(recordsByUserReq.getDiaryId());
+        Optional<User> user = userRepository.findById(recordsByUserReq.getUserId());
+        List<Record> records = recordRepository.findAllByDiaryAndUser(diary.get(), user);
 
         List<RecordDetailRes> recordDetailRes = records.stream().map(
                 record -> RecordDetailRes.builder()
