@@ -1,14 +1,17 @@
 package com.rom.domain.user.application;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import com.rom.domain.auth.domain.repository.TokenRepository;
 import com.rom.domain.common.Status;
 import com.rom.domain.user.dto.ChangePasswordReq;
+import com.rom.domain.user.dto.UpdateProfileReq;
 import com.rom.domain.user.dto.UserDetailRes;
 import com.rom.global.DefaultAssert;
 import com.rom.domain.user.domain.User;
 import com.rom.global.config.security.token.UserPrincipal;
+import com.rom.global.infrastructure.S3Uploader;
 import com.rom.global.payload.ApiResponse;
 import com.rom.domain.user.domain.repository.UserRepository;
 
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -29,6 +33,7 @@ public class UserService {
     private final TokenRepository tokenRepository;
 
     private final PasswordEncoder passwordEncoder;
+    private final S3Uploader s3Uploader;
 
 
     public ResponseEntity<?> findUserById(Long id) {
@@ -91,16 +96,22 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<?> deleteUser(UserPrincipal userPrincipal) {
+    public ResponseEntity<?> updateProfile(UserPrincipal userPrincipal, String nickname, MultipartFile profileImg) throws IOException {
         Optional<User> user = userRepository.findById(userPrincipal.getId());
-        DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다");
+        DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다.");
 
         User findUser = user.get();
-        findUser.updateStatus(Status.DELETE);
+
+        findUser.updateNickName(nickname);
+
+        if (!profileImg.isEmpty()) {
+            String storedFileName = s3Uploader.upload(profileImg, "profile_img");
+            findUser.updateImageUrl(storedFileName);
+        }
 
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
-                .information(Message.builder().message("유저 탈퇴가 완료되었습니다").build())
+                .information(Message.builder().message("프로필이 업데이트 되었습니다").build())
                 .build();
 
         return ResponseEntity.ok(apiResponse);
