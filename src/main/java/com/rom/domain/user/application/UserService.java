@@ -3,10 +3,10 @@ package com.rom.domain.user.application;
 import java.io.IOException;
 import java.util.Optional;
 
+import com.rom.domain.auth.domain.Token;
 import com.rom.domain.auth.domain.repository.TokenRepository;
 import com.rom.domain.common.Status;
 import com.rom.domain.user.dto.ChangePasswordReq;
-import com.rom.domain.user.dto.UpdateProfileReq;
 import com.rom.domain.user.dto.UserDetailRes;
 import com.rom.global.DefaultAssert;
 import com.rom.domain.user.domain.User;
@@ -112,6 +112,25 @@ public class UserService {
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
                 .information(Message.builder().message("프로필이 업데이트 되었습니다").build())
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @Transactional
+    public ResponseEntity<?> deleteUser(UserPrincipal userPrincipal) {
+        Optional<User> user = userRepository.findById(userPrincipal.getId());
+        DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다");
+
+        User findUser = user.get();
+        findUser.updateStatus(Status.DELETE);
+
+        Optional<Token> token = tokenRepository.findByUserEmail(findUser.getEmail());
+        token.ifPresent(tokenRepository::delete);
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(Message.builder().message("유저 탈퇴가 완료되었습니다.").build())
                 .build();
 
         return ResponseEntity.ok(apiResponse);
