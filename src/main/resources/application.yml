@@ -13,7 +13,7 @@ spring:
     ansi:
       enabled: always
   mvc:
-    pathmatch:
+    path match:
       matching-strategy: ant_path_matcher
 
 # 오류 처리

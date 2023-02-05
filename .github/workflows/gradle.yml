@@ -1,0 +1,92 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+
+# workflow의 이름
+name: Java CI with Gradle
+
+# main 브랜치에 push나 pull_request 이벤트를 트리거로 지정
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  AWS_REGION: ap-northeast-2
+  S3_BUCKET_NAME: recordofourmemorydeploybucket
+  CODE_DEPLOY_APPLICATION_NAME: RecordOfOurMemoryDeploy
+  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: dev
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    # 작업에서 액세스할 수 있도록 $GITHUB_WORKSPACE에서 저장소르 체크아웃
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+   
+   # rds, s3 등의 설정 정보를 github에 올리지 않기 위해 .gitignore에 application.properties 추가
+   # ec2 인스턴스에서 애플리케이션을 실행하기 위해서 설정 정보가 필요하기 때문에 application.properties을 settings의 secrets에 추가
+    - name: create application.properties file
+      run: |
+        touch ./src/main/resources/application.properties
+        echo "${{ secrets.ENV_VARS }}" >> src/main/resources/application.properties
+        
+        mkdir ./src/main/resources/database
+        touch ./src/main/resources/database/application-database.yml
+        echo "${{ secrets.ENV_VARS_DB }}" >> src/main/resources/database/application-database.yml
+        
+        mkdir ./src/main/resources/auth
+        touch ./src/main/resources/auth/application-auth.yml
+        echo "${{ secrets.ENV_VARS_AUTH }}" >> src/main/resources/auth/application-auth.yml
+        
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x ./gradlew
+      shell: bash
+    
+    - name: Build with Gradle
+      run: ./gradlew clean build -x test  # build 디렉토리 삭제 후 빌드
+      shell: bash
+
+    # AWS 인증 (S3, CodeDeploy 권한을 가진 IAM 사용자 Access Key, Secret Key)
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+            aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
+            aws-region: ${{ env.AWS_REGION }}
+            
+    # 빌드 결과물을 S3 버킷에 업로드
+    - name: Upload to AWS S3
+      run: |
+        aws deploy push \
+        --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
+        --ignore-hidden-files \
+        --s3-location s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip \
+        --source .
+          
+    # S3 버킷에 있는 파일을 대상으로 CodeDeploy 실행      
+    - name: Deploy to AWS EC2 from S3
+      run: |
+        aws deploy create-deployment \
+          --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
+          --deployment-config-name CodeDeployDefault.AllAtOnce \
+          --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
+          --s3-location bucket=$S3_BUCKET_NAME,bundleType=zip,key=$GITHUB_SHA.zip
+    
