@@ -1,5 +1,6 @@
 package com.rom.domain.diary.application;
 
+import com.rom.domain.comment.domain.repository.CommentRepository;
 import com.rom.domain.common.Status;
 import com.rom.domain.diary.domain.Diary;
 import com.rom.domain.diary.domain.DiaryType;
@@ -7,6 +8,7 @@ import com.rom.domain.diary.domain.UserDiary;
 import com.rom.domain.diary.domain.repository.DiaryRepository;
 import com.rom.domain.diary.domain.repository.UserDiaryRepository;
 import com.rom.domain.diary.dto.*;
+import com.rom.domain.likes.domain.repository.LikesRepository;
 import com.rom.domain.record.domain.Record;
 import com.rom.domain.record.dto.RecordDetailRes;
 import com.rom.domain.user.domain.Role;
@@ -33,6 +35,8 @@ public class DiaryService {
     private final DiaryRepository diaryRepository;
     private final UserRepository userRepository;
     private final UserDiaryRepository userDiaryRepository;
+    private final LikesRepository likesRepository;
+    private final CommentRepository commentRepository;
 
     @Transactional
     public ResponseEntity<?> createDiary(UserPrincipal userPrincipal, CreateDiaryReq createDiaryReq) {
@@ -168,6 +172,8 @@ public class DiaryService {
                                 .imageUrl(record.getUser().getImageUrl())
                                 .role(record.getUser().getRole())
                                 .build())
+                        .likeCount(likesRepository.findAllByRecordId(record.getId()).size())
+                        .commentCount(commentRepository.findAllByRecordId(record.getId()).size())
                         .build())
                 .toList();
 

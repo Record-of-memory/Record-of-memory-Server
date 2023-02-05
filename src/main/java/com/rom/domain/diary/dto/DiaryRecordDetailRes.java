@@ -22,14 +22,20 @@ public class DiaryRecordDetailRes {
 
     private UserDetailRes user;
 
+    private Integer likeCount;
+
+    private Integer commentCount;
+
     @Builder
-    public DiaryRecordDetailRes(Long id, String title, String content, String imgUrl, Date date, UserDetailRes user) {
+    public DiaryRecordDetailRes(Long id, String title, String content, String imgUrl, Date date, UserDetailRes user, Integer likeCount, Integer commentCount) {
         this.id = id;
         this.title = title;
         this.content = content;
         this.imgUrl = imgUrl;
         this.date = date;
         this.user = user;
+        this.likeCount = likeCount;
+        this.commentCount = commentCount;
     }
 
 }
