@@ -3,6 +3,7 @@ package com.rom.domain.diary.presentation;
 import com.rom.domain.diary.application.DiaryService;
 import com.rom.domain.diary.dto.CreateDiaryReq;
 import com.rom.domain.diary.dto.DiaryDetailRes;
+import com.rom.domain.diary.dto.DiaryListRes;
 import com.rom.domain.diary.dto.InviteUserReq;
 import com.rom.global.config.security.token.CurrentUser;
 import com.rom.global.config.security.token.UserPrincipal;
@@ -10,6 +11,7 @@ import com.rom.global.payload.ErrorResponse;
 import com.rom.global.payload.Message;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -43,7 +45,7 @@ public class DiaryController {
 
     @Operation(summary = "유저의 다이어리 목록 조회", description = "유저의 다이어리 목록을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "유저의 다이어리 목록 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = DiaryDetailRes.class))}),
+            @ApiResponse(responseCode = "200", description = "유저의 다이어리 목록 조회 성공", content = {@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = DiaryListRes.class)))}),
             @ApiResponse(responseCode = "400", description = "유저의 다이어리 목록 조회 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
     @GetMapping
