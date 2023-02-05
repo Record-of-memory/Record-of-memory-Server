@@ -6,10 +6,7 @@ import com.rom.domain.diary.domain.DiaryType;
 import com.rom.domain.diary.domain.UserDiary;
 import com.rom.domain.diary.domain.repository.DiaryRepository;
 import com.rom.domain.diary.domain.repository.UserDiaryRepository;
-import com.rom.domain.diary.dto.CreateDiaryReq;
-import com.rom.domain.diary.dto.DiaryDetailRes;
-import com.rom.domain.diary.dto.DiaryRecordDetailRes;
-import com.rom.domain.diary.dto.InviteUserReq;
+import com.rom.domain.diary.dto.*;
 import com.rom.domain.record.domain.Record;
 import com.rom.domain.record.dto.RecordDetailRes;
 import com.rom.domain.user.domain.Role;
@@ -68,8 +65,8 @@ public class DiaryService {
                 .map(UserDiary::getDiary)
                 .toList();
 
-        List<DiaryDetailRes> diaryDetailRes = diaries.stream()
-                .map(diary -> DiaryDetailRes.builder()
+        List<DiaryListRes> diaryListRes = diaries.stream()
+                .map(diary -> DiaryListRes.builder()
                         .id(diary.getId())
                         .name(diary.getName())
                         .diaryType(diary.getDiaryType().toString())
@@ -78,7 +75,7 @@ public class DiaryService {
 
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
-                .information(diaryDetailRes)
+                .information(diaryListRes)
                 .build();
 
         return ResponseEntity.ok(apiResponse);
