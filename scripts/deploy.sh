@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 REPOSITORY=/home/ubuntu/app
 cd $REPOSITORY
