@@ -1,8 +1,12 @@
 package com.rom.domain.record.application;
 
+import com.rom.domain.comment.domain.Comment;
+import com.rom.domain.comment.domain.repository.CommentRepository;
 import com.rom.domain.common.Status;
 import com.rom.domain.diary.domain.Diary;
 import com.rom.domain.diary.domain.repository.DiaryRepository;
+import com.rom.domain.likes.domain.Likes;
+import com.rom.domain.likes.domain.repository.LikesRepository;
 import com.rom.domain.record.domain.Record;
 import com.rom.domain.record.domain.repository.RecordRepository;
 import com.rom.domain.record.dto.*;
@@ -32,6 +36,8 @@ public class RecordService {
     private final UserRepository userRepository;
     private final DiaryRepository diaryRepository;
     private final RecordRepository recordRepository;
+    private final LikesRepository likesRepository;
+    private final CommentRepository commentRepository;
     private final S3Uploader s3Uploader;
 
     // 일기 작성
@@ -119,10 +125,9 @@ public class RecordService {
     }
 
     // 다이어리별 일기 조회
-    public ResponseEntity<?> getRecordsOfDiary(RecordsByDiaryReq recordsByDiaryReq) {
+    public ResponseEntity<?> getRecordsOfDiary(Long diaryId) {
 
-        Optional<Diary> diary = diaryRepository.findById(recordsByDiaryReq.getDiaryId());
-        System.out.println(diary.get());
+        Optional<Diary> diary = diaryRepository.findById(diaryId);
         List<Record> records = recordRepository.findAllByDiary(diary.get());
 
         List<RecordDetailRes> recordDetailRes = records.stream().map(
@@ -134,6 +139,9 @@ public class RecordService {
                         .content(record.getContent())
                         .title(record.getTitle())
                         .status(record.getStatus())
+                        .imgUrl(record.getImgUrl())
+                        .likeCnt(likeCount(record.getId()))
+                        .cmtCnt(commentCount(record.getId()))
                         .build()
         ).toList();
 
@@ -146,10 +154,69 @@ public class RecordService {
         return ResponseEntity.ok(apiResponse);
     }
 
-    // 개별 일기 상세 조회
-    public ResponseEntity<?> getRecordDetail(RecordDetailReq recordDetailReq) {
+    // 다이어리별 일기 조회(유저별)
+    public ResponseEntity<?> getRecordsOfDiaryByUser(RecordsByUserReq recordsByUserReq) {
 
-        Optional<Record> record = recordRepository.findById(recordDetailReq.getRecordId());
+        Optional<Diary> diary = diaryRepository.findById(recordsByUserReq.getDiaryId());
+        Optional<User> user = userRepository.findById(recordsByUserReq.getUserId());
+        List<Record> records = recordRepository.findAllByDiaryAndUser(diary.get(), user);
+
+        List<RecordDetailRes> recordDetailRes = records.stream().map(
+                record -> RecordDetailRes.builder()
+                        .id(record.getId())
+                        .user(record.getUser().getNickname())
+                        .diary(record.getDiary().getName())
+                        .date(record.getDate())
+                        .content(record.getContent())
+                        .title(record.getTitle())
+                        .status(record.getStatus())
+                        .imgUrl(record.getImgUrl())
+                        .likeCnt(likeCount(record.getId()))
+                        .cmtCnt(commentCount(record.getId()))
+                        .build()
+        ).toList();
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(recordDetailRes)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    // 다이어리별 일기 조회(날짜별)
+    public ResponseEntity<?> getRecordsOfDiaryByDate(RecordDateReq recordDateReq) {
+
+        Optional<Diary> diary = diaryRepository.findById(recordDateReq.getDiaryId());
+        List<Record> records = recordRepository.findAllByDiaryAndDate(diary.get(), recordDateReq.getDate());
+
+        List<RecordDetailRes> recordDetailRes = records.stream().map(
+                record -> RecordDetailRes.builder()
+                        .id(record.getId())
+                        .user(record.getUser().getNickname())
+                        .diary(record.getDiary().getName())
+                        .date(record.getDate())
+                        .content(record.getContent())
+                        .title(record.getTitle())
+                        .status(record.getStatus())
+                        .imgUrl(record.getImgUrl())
+                        .likeCnt(likeCount(record.getId()))
+                        .cmtCnt(commentCount(record.getId()))
+                        .build()
+        ).toList();
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(recordDetailRes)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    // 개별 일기 상세 조회
+    public ResponseEntity<?> getRecordDetail(Long recordId) {
+
+        Optional<Record> record = recordRepository.findById(recordId);
 
         RecordDetailRes recordDetailRes = RecordDetailRes.builder()
                 .id(record.get().getId())
@@ -159,6 +226,9 @@ public class RecordService {
                 .content(record.get().getContent())
                 .title(record.get().getTitle())
                 .status(record.get().getStatus())
+                .imgUrl(record.get().getImgUrl())
+                .likeCnt(likeCount(record.get().getId()))
+                .cmtCnt(commentCount(record.get().getId()))
                 .build();
 
         ApiResponse apiResponse = ApiResponse.builder()
@@ -198,6 +268,14 @@ public class RecordService {
         return ResponseEntity.ok(apiResponse);
     }
 
+    public int likeCount(Long id){
+        List<Likes> likes = likesRepository.findAllByRecordId(id);
+        return likes.size();
+    }
 
+    public int commentCount(Long id){
+        List<Comment> comments = commentRepository.findAllByRecordId(id);
+        return comments.size();
+    }
 
 }
