@@ -8,7 +8,11 @@ import com.rom.domain.diary.domain.repository.DiaryRepository;
 import com.rom.domain.diary.domain.repository.UserDiaryRepository;
 import com.rom.domain.diary.dto.CreateDiaryReq;
 import com.rom.domain.diary.dto.DiaryDetailRes;
+import com.rom.domain.diary.dto.DiaryRecordDetailRes;
 import com.rom.domain.diary.dto.InviteUserReq;
+import com.rom.domain.record.domain.Record;
+import com.rom.domain.record.dto.RecordDetailRes;
+import com.rom.domain.user.domain.Role;
 import com.rom.domain.user.domain.User;
 import com.rom.domain.user.domain.repository.UserRepository;
 import com.rom.domain.user.dto.UserDetailRes;
@@ -88,7 +92,7 @@ public class DiaryService {
         Optional<Diary> diary = diaryRepository.findById(inviteUserReq.getDiaryId());
         DefaultAssert.isTrue(diary.isPresent(), "다이어리가 올바르지 않습니다");
 
-        if (userDiaryRepository.existsUserDiaryByUserAndDiary(inviteUser.get(), diary.get())){
+        if (userDiaryRepository.existsUserDiaryByUserAndDiary(inviteUser.get(), diary.get())) {
             ApiResponse apiResponse = ApiResponse.builder()
                     .check(false)
                     .information(Message.builder().message("이미 존재하는 유저입니다.").build())
@@ -136,22 +140,51 @@ public class DiaryService {
         return ResponseEntity.ok(apiResponse);
     }
 
-    public ResponseEntity<?> findUsersByDiaryId(Long diaryId) {
-        List<User> users = userDiaryRepository.findAllByDiaryId(diaryId).stream()
+    public ResponseEntity<?> seeDiaryDetail(Long diaryId) {
+        Optional<Diary> diary = diaryRepository.findById(diaryId);
+        DefaultAssert.isTrue(diary.isPresent(), "다이어리가 올바르지 않습니다.");
+
+        Diary findDiary = diary.get();
+        List<User> users = userDiaryRepository.findAllByDiaryId(findDiary.getId()).stream()
                 .map(UserDiary::getUser)
                 .toList();
+        List<Record> records = findDiary.getRecords();
 
-        List<UserDetailRes> userDetailRes = users.stream()
+        List<UserDetailRes> usersDetailRes = users.stream()
                 .map(user -> UserDetailRes.builder()
                         .email(user.getEmail())
                         .nickname(user.getNickname())
                         .imageUrl(user.getImageUrl())
+                        .role(Role.USER)
                         .build())
                 .toList();
 
+        List<DiaryRecordDetailRes> recordsDetailRes = records.stream()
+                .map(record -> DiaryRecordDetailRes.builder()
+                        .id(record.getId())
+                        .title(record.getTitle())
+                        .content(record.getContent())
+                        .date(record.getDate())
+                        .user(UserDetailRes.builder()
+                                .email(record.getUser().getEmail())
+                                .nickname(record.getUser().getNickname())
+                                .imageUrl(record.getUser().getImageUrl())
+                                .role(record.getUser().getRole())
+                                .build())
+                        .build())
+                .toList();
+
+        DiaryDetailRes diaryDetailRes = DiaryDetailRes.builder()
+                .id(findDiary.getId())
+                .name(findDiary.getName())
+                .diaryType(findDiary.getDiaryType().toString())
+                .users(usersDetailRes)
+                .records(recordsDetailRes)
+                .build();
+
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
-                .information(userDetailRes)
+                .information(diaryDetailRes)
                 .build();
 
         return ResponseEntity.ok(apiResponse);
