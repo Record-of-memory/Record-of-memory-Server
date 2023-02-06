@@ -20,7 +20,6 @@ import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
-@Component
 @Service
 public class S3Uploader {
 

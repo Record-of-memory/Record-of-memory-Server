@@ -58,12 +58,12 @@ public class LikesService {
 
     //좋아요 취소
     @Transactional
-    public ResponseEntity<?> cancelLike(UserPrincipal userPrincipal, CancelLikeReq likeReq) {
+    public ResponseEntity<?> cancelLike(UserPrincipal userPrincipal, Long recordId) {
 
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다.");
 
-        Optional<Likes> like = likesRepository.findById(likeReq.getLikeId());
+        Optional<Likes> like = likesRepository.findById(recordId);
         DefaultAssert.isTrue(like.isPresent(), "좋아요가 올바르지 않습니다.");
 
         likesRepository.delete(like.get());
