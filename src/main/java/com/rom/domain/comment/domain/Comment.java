@@ -1,6 +1,9 @@
 package com.rom.domain.comment.domain;
 
 import com.rom.domain.common.BaseEntity;
+import com.rom.domain.user.domain.User;
+import jakarta.persistence.*;
+import lombok.Getter;
 import com.rom.domain.common.Status;
 import com.rom.domain.diary.domain.Diary;
 import com.rom.domain.record.domain.Record;
@@ -17,9 +20,11 @@ import org.hibernate.annotations.Where;
 @Getter
 @Entity
 @Where(clause = "status = 'ACTIVE'")
+
 public class Comment extends BaseEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)

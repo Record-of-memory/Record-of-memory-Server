@@ -1,7 +1,6 @@
 package com.rom.domain.likes.presentation;
 
 import com.rom.domain.likes.application.LikesService;
-import com.rom.domain.likes.dto.CancelLikeReq;
 import com.rom.domain.likes.dto.LikeReq;
 import com.rom.domain.likes.dto.LikeRes;
 import com.rom.global.config.security.token.CurrentUser;
@@ -49,12 +48,12 @@ public class LikesController {
             @ApiResponse(responseCode = "201", description = "좋아요 취소 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))}),
             @ApiResponse(responseCode = "400", description = "좋아요 취소 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> cancelLike(
             @Parameter(description = "AccessToken을 입력해주세요", required = true) @CurrentUser UserPrincipal userPrincipal,
-            @Parameter(description = "Schemas의 CancelLikeReq를 참고해주세요.", required = true) @Valid @RequestBody CancelLikeReq likeReq
+            @Parameter(description = "Schemas의 CancelLikeReq를 참고해주세요.", required = true) @Valid @PathVariable(value = "id") Long recordId
     ){
-        return likesService.cancelLike(userPrincipal, likeReq);
+        return likesService.cancelLike(userPrincipal, recordId);
     }
 
 
