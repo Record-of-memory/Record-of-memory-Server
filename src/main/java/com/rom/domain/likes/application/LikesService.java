@@ -1,9 +1,7 @@
 package com.rom.domain.likes.application;
 
-import com.rom.domain.common.Status;
 import com.rom.domain.likes.domain.Likes;
 import com.rom.domain.likes.domain.repository.LikesRepository;
-import com.rom.domain.likes.dto.CancelLikeReq;
 import com.rom.domain.likes.dto.LikeReq;
 import com.rom.domain.likes.dto.LikeRes;
 import com.rom.domain.record.domain.Record;
@@ -58,12 +56,12 @@ public class LikesService {
 
     //좋아요 취소
     @Transactional
-    public ResponseEntity<?> cancelLike(UserPrincipal userPrincipal, CancelLikeReq likeReq) {
+    public ResponseEntity<?> cancelLike(UserPrincipal userPrincipal, Long likeId) {
 
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다.");
 
-        Optional<Likes> like = likesRepository.findById(likeReq.getLikeId());
+        Optional<Likes> like = likesRepository.findById(likeId);
         DefaultAssert.isTrue(like.isPresent(), "좋아요가 올바르지 않습니다.");
 
         likesRepository.delete(like.get());

@@ -69,7 +69,7 @@ public class CommentController {
     @GetMapping("/{id}")
     public ResponseEntity<?> findComments(
             @Parameter(description = "AccessToken을 입력해주세요", required = true) @CurrentUser UserPrincipal userPrincipal,
-            @Parameter(description = "일기의 id입니다.", required = true) @Valid @PathVariable("id") Long recordId
+            @Parameter(description = "일기의 ID입니다.", required = true) @Valid @PathVariable("id") Long recordId
     ){
         return commentService.findAllComments(userPrincipal, recordId);
     }
