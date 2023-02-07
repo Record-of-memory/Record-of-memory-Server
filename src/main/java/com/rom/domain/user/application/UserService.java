@@ -1,6 +1,7 @@
 package com.rom.domain.user.application;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import com.rom.domain.auth.domain.Token;
@@ -136,4 +137,23 @@ public class UserService {
         return ResponseEntity.ok(apiResponse);
     }
 
+    public ResponseEntity<?> findUsers(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        DefaultAssert.isTrue(user.isPresent(), "유저가 존재하지 않습니다");
+
+        User findUser = user.get();
+        UserDetailRes userDetailRes = UserDetailRes.builder()
+                .email(findUser.getEmail())
+                .nickname(findUser.getNickname())
+                .imageUrl(findUser.getImageUrl())
+                .role(findUser.getRole())
+                .build();
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(userDetailRes)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
 }
