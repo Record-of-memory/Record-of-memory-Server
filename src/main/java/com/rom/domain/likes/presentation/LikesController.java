@@ -51,9 +51,9 @@ public class LikesController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> cancelLike(
             @Parameter(description = "AccessToken을 입력해주세요", required = true) @CurrentUser UserPrincipal userPrincipal,
-            @Parameter(description = "Schemas의 CancelLikeReq를 참고해주세요.", required = true) @Valid @PathVariable(value = "id") Long recordId
+            @Parameter(description = "좋아요의 ID입니다.", required = true) @Valid @PathVariable(value = "id") Long likeId
     ){
-        return likesService.cancelLike(userPrincipal, recordId);
+        return likesService.cancelLike(userPrincipal, likeId);
     }
 
 
