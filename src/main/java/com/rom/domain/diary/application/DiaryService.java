@@ -193,4 +193,41 @@ public class DiaryService {
         return ResponseEntity.ok(apiResponse);
     }
 
+    public ResponseEntity<?> searchRecord(Long diaryId, String search) {
+        Optional<Diary> diary = diaryRepository.findById(diaryId);
+        DefaultAssert.isTrue(diary.isPresent(), "다이어리가 올바르지 않습니다");
+
+        List<Record> records = diary.get().getRecords();
+        DefaultAssert.isTrue(!records.isEmpty(), "일기가 존재하지 않습니다.");
+
+        List<Record> searchRecords = records.stream()
+                .filter(record -> record.getTitle().contains(search))
+                .toList();
+        DefaultAssert.isTrue(!searchRecords.isEmpty(), "검색어에 해당하는 일기가 존재하지 않습니다.");
+
+        List<DiaryRecordDetailRes> responseRecords = searchRecords.stream()
+                .map(record -> DiaryRecordDetailRes.builder()
+                        .id(record.getId())
+                        .title(record.getTitle())
+                        .content(record.getContent())
+                        .date(record.getDate())
+                        .user(UserDetailRes.builder()
+                                .email(record.getUser().getEmail())
+                                .nickname(record.getUser().getNickname())
+                                .imageUrl(record.getUser().getImageUrl())
+                                .role(record.getUser().getRole())
+                                .build())
+                        .likeCount(likesRepository.findAllByRecordId(record.getId()).size())
+                        .commentCount(commentRepository.findAllByRecordId(record.getId()).size())
+                        .build())
+                .toList();
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(responseRecords)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
 }
