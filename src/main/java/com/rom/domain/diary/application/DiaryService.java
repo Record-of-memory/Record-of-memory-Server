@@ -65,6 +65,10 @@ public class DiaryService {
     }
 
     public ResponseEntity<?> findDiariesByUserId(UserPrincipal userPrincipal) {
+
+        Optional<User> user = userRepository.findById(userPrincipal.getId());
+        DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다.");
+
         List<Diary> diaries = userDiaryRepository.findAllByUserId(userPrincipal.getId()).stream()
                 .map(UserDiary::getDiary)
                 .toList();
@@ -73,6 +77,7 @@ public class DiaryService {
                 .map(diary -> DiaryListRes.builder()
                         .id(diary.getId())
                         .name(diary.getName())
+                        .nickname(user.get().getNickname())
                         .diaryType(diary.getDiaryType().toString())
                         .build())
                 .toList();
@@ -108,6 +113,8 @@ public class DiaryService {
 
         userDiaryRepository.save(userDiary);
 
+        diary.get().updateDiaryType(DiaryType.WITH);
+
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
                 .information(Message.builder().message("유저 초대가 완료되었습니다.").build())
@@ -131,6 +138,13 @@ public class DiaryService {
 
         if (!userDiaryRepository.existsUserDiaryByDiary(diary.get())) {
             diary.get().updateStatus(Status.DELETE);
+        }
+
+        List<User> users = userDiaryRepository.findAllByDiaryId(diary.get().getId()).stream()
+                .map(UserDiary::getUser)
+                .toList();
+        if (users.size() == 1) {
+            diary.get().updateDiaryType(DiaryType.ALONE);
         }
 
         ApiResponse apiResponse = ApiResponse.builder()
