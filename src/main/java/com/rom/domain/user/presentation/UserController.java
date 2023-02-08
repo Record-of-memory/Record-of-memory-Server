@@ -32,6 +32,19 @@ public class UserController {
 
     private final UserService userService;
 
+
+    @Operation(summary = "Email로 유저 조회", description = "Email로 유저를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "유저 정보 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = UserDetailRes.class))}),
+            @ApiResponse(responseCode = "400", description = "유저 정보 조회 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
+    @GetMapping
+    public ResponseEntity<?> findUsers(
+            @Parameter(description = "유저 Email 입니다.", required = true) @RequestParam String email
+    ) {
+        return userService.findUsers(email);
+    }
+
     @Operation(summary = "ID로 유저 정보 조회", description = "ID로 유저 정보를 조회합니다")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "ID로 유저 정보 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = UserDetailRes.class))}),
