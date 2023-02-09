@@ -58,7 +58,7 @@ public class LikesController {
 
 
     //좋아요 클릭 여부 조회
-    @Operation(summary = "좋아요 클릭 여부", description = "일기에 달린 좋아요의 개수를 조회합니다.")
+    @Operation(summary = "좋아요 클릭 여부", description = "유저의 일기 좋아요 클릭 여부를 확인합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "좋아요 개수 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = LikeRes.class))}),
             @ApiResponse(responseCode = "400", description = "좋아요 개수 조회 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
