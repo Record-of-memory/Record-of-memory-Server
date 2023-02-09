@@ -14,6 +14,7 @@ import java.util.Date;
 @Entity
 @Getter
 @Setter
+@Where(clause = "status = 'ACTIVE'")
 public class Record extends BaseEntity {
 
     @Id
@@ -38,7 +39,6 @@ public class Record extends BaseEntity {
     private Diary diary;
 
     @Enumerated(EnumType.STRING)
-    @Where(clause = "status = ACTIVE")
     private Status status = Status.valueOf("ACTIVE");
 
     @Builder
