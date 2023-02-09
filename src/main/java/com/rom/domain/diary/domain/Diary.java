@@ -42,4 +42,6 @@ public class Diary extends BaseEntity {
         this.name = name;
     }
 
+    public void updateDiaryType(DiaryType diaryType){ this.diaryType = diaryType; }
+
 }

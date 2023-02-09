@@ -10,12 +10,15 @@ public class DiaryListRes {
 
     private String name;
 
+    private String nickname;
+
     private String diaryType;
 
     @Builder
-    public DiaryListRes(Long id, String name, String diaryType) {
+    public DiaryListRes(Long id, String name, String nickname, String diaryType) {
         this.id = id;
         this.name = name;
+        this.nickname = nickname;
         this.diaryType = diaryType;
     }
 
