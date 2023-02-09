@@ -40,6 +40,9 @@ public class LikesService {
         Optional<Record> record = recordRepository.findById(likeReq.getRecordId());
         DefaultAssert.isTrue(record.isPresent(), "일기가 올바르지 않습니다.");
 
+        Optional<Likes> like = likesRepository.findByUserAndRecord(user.get(), record.get());
+        DefaultAssert.isTrue(like.isEmpty(), "이미 좋아요 했습니다.");
+
         Likes likes = Likes.builder()
                 .user(user.get())
                 .record(record.get())
@@ -57,13 +60,16 @@ public class LikesService {
 
     //좋아요 취소
     @Transactional
-    public ResponseEntity<?> cancelLike(UserPrincipal userPrincipal, Long likeId) {
+    public ResponseEntity<?> cancelLike(UserPrincipal userPrincipal, Long recordId) {
 
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다.");
 
-        Optional<Likes> like = likesRepository.findById(likeId);
-        DefaultAssert.isTrue(like.isPresent(), "좋아요가 올바르지 않습니다.");
+        Optional<Record> record = recordRepository.findById(recordId);
+        DefaultAssert.isTrue(record.isPresent(), "일기가 올바르지 않습니다.");
+
+        Optional<Likes> like = likesRepository.findByUserAndRecord(user.get(), record.get());
+        DefaultAssert.isTrue(like.isPresent(), "취소할 좋아요가 없습니다.");
 
         likesRepository.delete(like.get());
 
@@ -105,12 +111,12 @@ public class LikesService {
         Optional<Record> record = recordRepository.findById(recordId);
         DefaultAssert.isTrue(record.isPresent(), "일기가 올바르지 않습니다");
 
-        boolean isClicked = likesRepository.existsLikesByUserAndRecord(user.get(), record.get());
+        Optional<Likes> likes = likesRepository.findByUserAndRecord(user.get(), record.get());
 
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
                 .information(LikeClickedRes.builder()
-                        .isLikeClicked(isClicked)
+                        .isLikeClicked(likes.isPresent())
                         .build())
                 .build();
 
