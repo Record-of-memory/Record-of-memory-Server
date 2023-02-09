@@ -2,6 +2,7 @@ package com.rom.domain.likes.application;
 
 import com.rom.domain.likes.domain.Likes;
 import com.rom.domain.likes.domain.repository.LikesRepository;
+import com.rom.domain.likes.dto.LikeClickedRes;
 import com.rom.domain.likes.dto.LikeReq;
 import com.rom.domain.likes.dto.LikeRes;
 import com.rom.domain.record.domain.Record;
@@ -92,6 +93,25 @@ public class LikesService {
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
                 .information(likeRes)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    public ResponseEntity<?> isLikeClicked(UserPrincipal userPrincipal, Long recordId) {
+        Optional<User> user = userRepository.findById(userPrincipal.getId());
+        DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다");
+
+        Optional<Record> record = recordRepository.findById(recordId);
+        DefaultAssert.isTrue(record.isPresent(), "일기가 올바르지 않습니다");
+
+        boolean isClicked = likesRepository.existsLikesByUserAndRecord(user.get(), record.get());
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(LikeClickedRes.builder()
+                        .isLikeClicked(isClicked)
+                        .build())
                 .build();
 
         return ResponseEntity.ok(apiResponse);
