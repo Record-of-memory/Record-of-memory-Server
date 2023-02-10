@@ -1,6 +1,9 @@
 package com.rom.domain.record.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.rom.domain.record.domain.Record;
+
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -14,8 +17,9 @@ public class WriteRecordReq {
     @NotNull
     private Long diaryId;
 
-    @Schema(type = "date", example = "2023-01-21", description = "일기가 작성될 날짜")
+    @Schema(type = "string", example = "2023-01-21", description = "일기가 작성될 날짜")
     @NotNull
+    @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
     private Date date;
 
     @Schema(type = "string", example = "핑크뮬리가 예뻤던 날", description = "일기 제목")

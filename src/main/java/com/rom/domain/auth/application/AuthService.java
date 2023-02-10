@@ -156,5 +156,19 @@ public class AuthService {
         return true;
     }
 
+    //이메일 중복 검사 (회원가입 시)
+    public ResponseEntity<?> checkEmail(String email){
+
+        Boolean isEmail = userRepository.existsByEmail(email);
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(CheckEmailRes.builder()
+                        .isEmail(isEmail)
+                        .build())
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
 
 }

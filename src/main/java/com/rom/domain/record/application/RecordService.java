@@ -4,7 +4,10 @@ import com.rom.domain.comment.domain.Comment;
 import com.rom.domain.comment.domain.repository.CommentRepository;
 import com.rom.domain.common.Status;
 import com.rom.domain.diary.domain.Diary;
+import com.rom.domain.diary.domain.UserDiary;
 import com.rom.domain.diary.domain.repository.DiaryRepository;
+import com.rom.domain.diary.domain.repository.UserDiaryRepository;
+import com.rom.domain.diary.dto.DiaryRecordDetailRes;
 import com.rom.domain.likes.domain.Likes;
 import com.rom.domain.likes.domain.repository.LikesRepository;
 import com.rom.domain.record.domain.Record;
@@ -12,6 +15,7 @@ import com.rom.domain.record.domain.repository.RecordRepository;
 import com.rom.domain.record.dto.*;
 import com.rom.domain.user.domain.User;
 import com.rom.domain.user.domain.repository.UserRepository;
+import com.rom.domain.user.dto.UserDetailRes;
 import com.rom.global.DefaultAssert;
 import com.rom.global.config.security.token.UserPrincipal;
 import com.rom.global.infrastructure.S3Uploader;
@@ -24,8 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -36,6 +40,7 @@ public class RecordService {
     private final UserRepository userRepository;
     private final DiaryRepository diaryRepository;
     private final RecordRepository recordRepository;
+    private final UserDiaryRepository userDiaryRepository;
     private final LikesRepository likesRepository;
     private final CommentRepository commentRepository;
     private final S3Uploader s3Uploader;
@@ -61,7 +66,7 @@ public class RecordService {
 
         // img가 비어있는지 체크
         // 업로드할 디렉토리 이름 설정 (record의 이미지는 record_img, 프로필의 이미지는 profile_img
-        if (!img.isEmpty()){
+        if (img != null) {
             String storedFileName = s3Uploader.upload(img, "record_img");
             record.setImgUrl(storedFileName);
         }
@@ -155,10 +160,14 @@ public class RecordService {
     }
 
     // 다이어리별 일기 조회(유저별)
-    public ResponseEntity<?> getRecordsOfDiaryByUser(RecordsByUserReq recordsByUserReq) {
+    public ResponseEntity<?> getRecordsOfDiaryByUser(Long diaryId, Long userId) {
 
-        Optional<Diary> diary = diaryRepository.findById(recordsByUserReq.getDiaryId());
-        Optional<User> user = userRepository.findById(recordsByUserReq.getUserId());
+        Optional<Diary> diary = diaryRepository.findById(diaryId);
+        DefaultAssert.isTrue(diary.isPresent(), "올바르지 않은 다이어리입니다.");
+
+        Optional<User> user = userRepository.findById(userId);
+        DefaultAssert.isTrue(user.isPresent(), "올바르지 않은 유저입니다.");
+
         List<Record> records = recordRepository.findAllByDiaryAndUser(diary.get(), user);
 
         List<RecordDetailRes> recordDetailRes = records.stream().map(
@@ -185,29 +194,63 @@ public class RecordService {
     }
 
     // 다이어리별 일기 조회(날짜별)
-    public ResponseEntity<?> getRecordsOfDiaryByDate(RecordDateReq recordDateReq) {
+    public ResponseEntity<?> getRecordsOfDiaryByDate(UserPrincipal userPrincipal, Date date) {
+        Optional<User> user = userRepository.findById(userPrincipal.getId());
+        DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다.");
 
-        Optional<Diary> diary = diaryRepository.findById(recordDateReq.getDiaryId());
-        List<Record> records = recordRepository.findAllByDiaryAndDate(diary.get(), recordDateReq.getDate());
+        List<Record> records = recordRepository.findAllByDateAndUser(date, user.get());
+        DefaultAssert.isTrue(!records.isEmpty(), "날짜에 해당하는 일기가 존재하지 않습니다.");
 
-        List<RecordDetailRes> recordDetailRes = records.stream().map(
-                record -> RecordDetailRes.builder()
+        List<FindRecordByDateRes> diaryRecordDetailRes = new ArrayList<>();
+        for (Record record : records) {
+            Optional<FindRecordByDateRes> findRecordByDateRes = diaryRecordDetailRes.stream()
+                    .filter(filter -> Objects.equals(filter.getDiaryId(), record.getDiary().getId()))
+                    .findAny();
+            if (findRecordByDateRes.isPresent()) {
+                findRecordByDateRes.get().getRecords().add(DiaryRecordDetailRes.builder()
                         .id(record.getId())
-                        .user(record.getUser().getNickname())
-                        .diary(record.getDiary().getName())
-                        .date(record.getDate())
-                        .content(record.getContent())
                         .title(record.getTitle())
-                        .status(record.getStatus())
+                        .content(record.getContent())
                         .imgUrl(record.getImgUrl())
-                        .likeCnt(likeCount(record.getId()))
-                        .cmtCnt(commentCount(record.getId()))
-                        .build()
-        ).toList();
+                        .date(record.getDate())
+                        .user(UserDetailRes.builder()
+                                .email(record.getUser().getEmail())
+                                .nickname(record.getUser().getNickname())
+                                .imageUrl(record.getUser().getImageUrl())
+                                .role(record.getUser().getRole())
+                                .build())
+                        .likeCount(likesRepository.findAllByRecordId(record.getId()).size())
+                        .commentCount(commentRepository.findAllByRecordId(record.getId()).size())
+                        .build());
+                continue;
+            }
+            List<DiaryRecordDetailRes> detailRes = new ArrayList<>();
+            DiaryRecordDetailRes drdr = DiaryRecordDetailRes.builder()
+                    .id(record.getId())
+                    .title(record.getTitle())
+                    .content(record.getContent())
+                    .imgUrl(record.getImgUrl())
+                    .date(record.getDate())
+                    .user(UserDetailRes.builder()
+                            .email(record.getUser().getEmail())
+                            .nickname(record.getUser().getNickname())
+                            .imageUrl(record.getUser().getImageUrl())
+                            .role(record.getUser().getRole())
+                            .build())
+                    .likeCount(likesRepository.findAllByRecordId(record.getId()).size())
+                    .commentCount(commentRepository.findAllByRecordId(record.getId()).size())
+                    .build();
+            detailRes.add(drdr);
+            diaryRecordDetailRes.add(FindRecordByDateRes.builder()
+                    .diaryId(record.getDiary().getId())
+                    .diaryName(record.getDiary().getName())
+                    .records(detailRes)
+                    .build());
+        }
 
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
-                .information(recordDetailRes)
+                .information(diaryRecordDetailRes)
                 .build();
 
         return ResponseEntity.ok(apiResponse);
@@ -242,7 +285,7 @@ public class RecordService {
 
     // 다이어리 수정
     @Transactional
-    public ResponseEntity<?> updateRecord(UserPrincipal userPrincipal, UpdateRecordReq updateRecordReq, MultipartFile img) throws IOException{
+    public ResponseEntity<?> updateRecord(UserPrincipal userPrincipal, UpdateRecordReq updateRecordReq, MultipartFile img) throws IOException {
 
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         DefaultAssert.isTrue(user.isPresent(), "올바른 유저가 아닙니다.");
@@ -252,20 +295,20 @@ public class RecordService {
 
         Record findRecord = record.get();
 
-        if (updateRecordReq.getDate() != null){
+        if (updateRecordReq.getDate() != null) {
             findRecord.updateDate(updateRecordReq.getDate());
         }
-        if (updateRecordReq.getTitle() != null){
+        if (updateRecordReq.getTitle() != null) {
             findRecord.updateTitle(updateRecordReq.getTitle());
         }
-        if (updateRecordReq.getContent() != null){
+        if (updateRecordReq.getContent() != null) {
             findRecord.updateContent(updateRecordReq.getContent());
         }
 
-        if (!img.isEmpty()) {
+        if (img != null) {
             String storedFileName = s3Uploader.upload(img, "record_img");
             findRecord.updateImg(storedFileName);
-        }else{
+        } else {
             findRecord.updateImg(null);
         }
 
@@ -277,12 +320,99 @@ public class RecordService {
         return ResponseEntity.ok(apiResponse);
     }
 
-    public int likeCount(Long id){
+    //그리드뷰 전용 유저별 일기 조회
+    public ResponseEntity<?> getGridRecords(Long diaryId) {
+
+        Optional<Diary> diary = diaryRepository.findById(diaryId);
+        DefaultAssert.isTrue(diary.isPresent(), "올바른 일기가 아닙니다.");
+
+        List<User> findUser = userDiaryRepository.findAllByDiaryId(diary.get().getId()).stream()
+                .map(UserDiary::getUser)
+                .toList();
+
+        List<GridUserRes> gridUserResList = new ArrayList<>();
+
+        for (User value : findUser) {
+            List<Record> findRecords = recordRepository.findAllByDiaryAndUserAndImgUrlNotNull(diary.get(), value);
+
+            List<GridRecordRes> gridRecordRes = findRecords.stream()
+                    .map(record -> GridRecordRes.builder()
+                            .id(record.getId())
+                            .title(record.getTitle())
+                            .imgUrl(record.getImgUrl())
+                            .build())
+                    .toList();
+
+            GridUserRes gridUserRes = GridUserRes.builder()
+                    .id(value.getId())
+                    .nickname(value.getNickname())
+                    .imgUrl(value.getImageUrl())
+                    .records(gridRecordRes)
+                    .build();
+
+            gridUserResList.add(gridUserRes);
+        }
+
+        GridResultRes gridResultRes = GridResultRes.builder()
+                .id(diary.get().getId())
+                .name(diary.get().getName())
+                .users(gridUserResList)
+                .build();
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(gridResultRes)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    //그리드뷰 전용 유저별 일기 조회 (상세페이지)
+    public ResponseEntity<?> getGridRecordsDetail(Long diaryId, Long userId) {
+
+        Optional<Diary> diary = diaryRepository.findById(diaryId);
+        DefaultAssert.isTrue(diary.isPresent(), "올바른 일기가 아닙니다.");
+
+        Optional<User> findUser = userRepository.findById(userId);
+        DefaultAssert.isTrue(findUser.isPresent(), "올바른 유저가 아닙니다.");
+
+        List<Record> findRecords = recordRepository.findAllByDiaryAndUserAndImgUrlNotNull(diary.get(), findUser.get());
+
+        List<GridRecordRes> gridRecordRes = findRecords.stream()
+                .map(record -> GridRecordRes.builder()
+                        .id(record.getId())
+                        .title(record.getTitle())
+                        .imgUrl(record.getImgUrl())
+                        .build())
+                .toList();
+
+        GridUserRes gridUserRes = GridUserRes.builder()
+                .id(findUser.get().getId())
+                .nickname(findUser.get().getNickname())
+                .imgUrl(findUser.get().getImageUrl())
+                .records(gridRecordRes)
+                .build();
+
+        GridResultDetailRes gridResultDetailRes = GridResultDetailRes.builder()
+                .id(diary.get().getId())
+                .name(diary.get().getName())
+                .user(gridUserRes)
+                .build();
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(gridResultDetailRes)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    public int likeCount(Long id) {
         List<Likes> likes = likesRepository.findAllByRecordId(id);
         return likes.size();
     }
 
-    public int commentCount(Long id){
+    public int commentCount(Long id) {
         List<Comment> comments = commentRepository.findAllByRecordId(id);
         return comments.size();
     }
