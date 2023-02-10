@@ -14,6 +14,7 @@ import com.rom.domain.user.domain.User;
 import com.rom.domain.user.domain.repository.UserRepository;
 import com.rom.global.DefaultAssert;
 import com.rom.global.config.security.token.UserPrincipal;
+import com.rom.global.infrastructure.S3Uploader;
 import com.rom.global.payload.ApiResponse;
 import com.rom.global.payload.Message;
 import lombok.RequiredArgsConstructor;

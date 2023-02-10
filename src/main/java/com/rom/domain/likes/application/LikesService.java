@@ -1,9 +1,8 @@
 package com.rom.domain.likes.application;
 
-import com.rom.domain.common.Status;
 import com.rom.domain.likes.domain.Likes;
 import com.rom.domain.likes.domain.repository.LikesRepository;
-import com.rom.domain.likes.dto.CancelLikeReq;
+import com.rom.domain.likes.dto.LikeClickedRes;
 import com.rom.domain.likes.dto.LikeReq;
 import com.rom.domain.likes.dto.LikeRes;
 import com.rom.domain.record.domain.Record;
@@ -41,6 +40,9 @@ public class LikesService {
         Optional<Record> record = recordRepository.findById(likeReq.getRecordId());
         DefaultAssert.isTrue(record.isPresent(), "일기가 올바르지 않습니다.");
 
+        Optional<Likes> like = likesRepository.findByUserAndRecord(user.get(), record.get());
+        DefaultAssert.isTrue(like.isEmpty(), "이미 좋아요 했습니다.");
+
         Likes likes = Likes.builder()
                 .user(user.get())
                 .record(record.get())
@@ -58,13 +60,16 @@ public class LikesService {
 
     //좋아요 취소
     @Transactional
-    public ResponseEntity<?> cancelLike(UserPrincipal userPrincipal, CancelLikeReq likeReq) {
+    public ResponseEntity<?> cancelLike(UserPrincipal userPrincipal, Long recordId) {
 
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다.");
 
-        Optional<Likes> like = likesRepository.findById(likeReq.getLikeId());
-        DefaultAssert.isTrue(like.isPresent(), "좋아요가 올바르지 않습니다.");
+        Optional<Record> record = recordRepository.findById(recordId);
+        DefaultAssert.isTrue(record.isPresent(), "일기가 올바르지 않습니다.");
+
+        Optional<Likes> like = likesRepository.findByUserAndRecord(user.get(), record.get());
+        DefaultAssert.isTrue(like.isPresent(), "취소할 좋아요가 없습니다.");
 
         likesRepository.delete(like.get());
 
@@ -94,6 +99,25 @@ public class LikesService {
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
                 .information(likeRes)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    public ResponseEntity<?> isLikeClicked(UserPrincipal userPrincipal, Long recordId) {
+        Optional<User> user = userRepository.findById(userPrincipal.getId());
+        DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다");
+
+        Optional<Record> record = recordRepository.findById(recordId);
+        DefaultAssert.isTrue(record.isPresent(), "일기가 올바르지 않습니다");
+
+        Optional<Likes> likes = likesRepository.findByUserAndRecord(user.get(), record.get());
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(LikeClickedRes.builder()
+                        .isLikeClicked(likes.isPresent())
+                        .build())
                 .build();
 
         return ResponseEntity.ok(apiResponse);

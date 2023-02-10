@@ -1,15 +1,17 @@
 package com.rom.domain.diary.application;
 
+import com.rom.domain.comment.domain.repository.CommentRepository;
 import com.rom.domain.common.Status;
 import com.rom.domain.diary.domain.Diary;
 import com.rom.domain.diary.domain.DiaryType;
 import com.rom.domain.diary.domain.UserDiary;
 import com.rom.domain.diary.domain.repository.DiaryRepository;
 import com.rom.domain.diary.domain.repository.UserDiaryRepository;
-import com.rom.domain.diary.dto.CreateDiaryReq;
-import com.rom.domain.diary.dto.DiaryDetailRes;
-import com.rom.domain.diary.dto.InviteUserReq;
-import com.rom.domain.diary.dto.LeaveDiaryReq;
+import com.rom.domain.diary.dto.*;
+import com.rom.domain.likes.domain.repository.LikesRepository;
+import com.rom.domain.record.domain.Record;
+import com.rom.domain.record.dto.RecordDetailRes;
+import com.rom.domain.user.domain.Role;
 import com.rom.domain.user.domain.User;
 import com.rom.domain.user.domain.repository.UserRepository;
 import com.rom.domain.user.dto.UserDetailRes;
@@ -33,6 +35,8 @@ public class DiaryService {
     private final DiaryRepository diaryRepository;
     private final UserRepository userRepository;
     private final UserDiaryRepository userDiaryRepository;
+    private final LikesRepository likesRepository;
+    private final CommentRepository commentRepository;
 
     @Transactional
     public ResponseEntity<?> createDiary(UserPrincipal userPrincipal, CreateDiaryReq createDiaryReq) {
@@ -61,21 +65,26 @@ public class DiaryService {
     }
 
     public ResponseEntity<?> findDiariesByUserId(UserPrincipal userPrincipal) {
+
+        Optional<User> user = userRepository.findById(userPrincipal.getId());
+        DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다.");
+
         List<Diary> diaries = userDiaryRepository.findAllByUserId(userPrincipal.getId()).stream()
                 .map(UserDiary::getDiary)
                 .toList();
 
-        List<DiaryDetailRes> diaryDetailRes = diaries.stream()
-                .map(diary -> DiaryDetailRes.builder()
+        List<DiaryListRes> diaryListRes = diaries.stream()
+                .map(diary -> DiaryListRes.builder()
                         .id(diary.getId())
                         .name(diary.getName())
+                        .nickname(user.get().getNickname())
                         .diaryType(diary.getDiaryType().toString())
                         .build())
                 .toList();
 
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
-                .information(diaryDetailRes)
+                .information(diaryListRes)
                 .build();
 
         return ResponseEntity.ok(apiResponse);
@@ -89,7 +98,7 @@ public class DiaryService {
         Optional<Diary> diary = diaryRepository.findById(inviteUserReq.getDiaryId());
         DefaultAssert.isTrue(diary.isPresent(), "다이어리가 올바르지 않습니다");
 
-        if (userDiaryRepository.existsUserDiaryByUserAndDiary(inviteUser.get(), diary.get())){
+        if (userDiaryRepository.existsUserDiaryByUserAndDiary(inviteUser.get(), diary.get())) {
             ApiResponse apiResponse = ApiResponse.builder()
                     .check(false)
                     .information(Message.builder().message("이미 존재하는 유저입니다.").build())
@@ -104,6 +113,8 @@ public class DiaryService {
 
         userDiaryRepository.save(userDiary);
 
+        diary.get().updateDiaryType(DiaryType.WITH);
+
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
                 .information(Message.builder().message("유저 초대가 완료되었습니다.").build())
@@ -113,11 +124,11 @@ public class DiaryService {
     }
 
     @Transactional
-    public ResponseEntity<?> leaveDiary(UserPrincipal userPrincipal, LeaveDiaryReq leaveDiaryReq) {
+    public ResponseEntity<?> leaveDiary(UserPrincipal userPrincipal, Long diaryId) {
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다");
 
-        Optional<Diary> diary = diaryRepository.findById(leaveDiaryReq.getDiaryId());
+        Optional<Diary> diary = diaryRepository.findById(diaryId);
         DefaultAssert.isTrue(diary.isPresent(), "다이어리가 올바르지 않습니다.");
 
         Optional<UserDiary> userDiary = userDiaryRepository.findUserDiaryByUserAndDiary(user.get(), diary.get());
@@ -129,6 +140,13 @@ public class DiaryService {
             diary.get().updateStatus(Status.DELETE);
         }
 
+        List<User> users = userDiaryRepository.findAllByDiaryId(diary.get().getId()).stream()
+                .map(UserDiary::getUser)
+                .toList();
+        if (users.size() == 1) {
+            diary.get().updateDiaryType(DiaryType.ALONE);
+        }
+
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
                 .information(Message.builder().message("다이어리 나가기가 완료되었습니다.").build())
@@ -137,22 +155,90 @@ public class DiaryService {
         return ResponseEntity.ok(apiResponse);
     }
 
-    public ResponseEntity<?> findUsersByDiaryId(Long diaryId) {
-        List<User> users = userDiaryRepository.findAllByDiaryId(diaryId).stream()
+    public ResponseEntity<?> seeDiaryDetail(Long diaryId) {
+        Optional<Diary> diary = diaryRepository.findById(diaryId);
+        DefaultAssert.isTrue(diary.isPresent(), "다이어리가 올바르지 않습니다.");
+
+        Diary findDiary = diary.get();
+        List<User> users = userDiaryRepository.findAllByDiaryId(findDiary.getId()).stream()
                 .map(UserDiary::getUser)
                 .toList();
+        List<Record> records = findDiary.getRecords();
 
-        List<UserDetailRes> userDetailRes = users.stream()
+        List<UserDetailRes> usersDetailRes = users.stream()
                 .map(user -> UserDetailRes.builder()
                         .email(user.getEmail())
                         .nickname(user.getNickname())
                         .imageUrl(user.getImageUrl())
+                        .role(Role.USER)
+                        .build())
+                .toList();
+
+        List<DiaryRecordDetailRes> recordsDetailRes = records.stream()
+                .map(record -> DiaryRecordDetailRes.builder()
+                        .id(record.getId())
+                        .title(record.getTitle())
+                        .content(record.getContent())
+                        .date(record.getDate())
+                        .user(UserDetailRes.builder()
+                                .email(record.getUser().getEmail())
+                                .nickname(record.getUser().getNickname())
+                                .imageUrl(record.getUser().getImageUrl())
+                                .role(record.getUser().getRole())
+                                .build())
+                        .likeCount(likesRepository.findAllByRecordId(record.getId()).size())
+                        .commentCount(commentRepository.findAllByRecordId(record.getId()).size())
+                        .build())
+                .toList();
+
+        DiaryDetailRes diaryDetailRes = DiaryDetailRes.builder()
+                .id(findDiary.getId())
+                .name(findDiary.getName())
+                .diaryType(findDiary.getDiaryType().toString())
+                .users(usersDetailRes)
+                .records(recordsDetailRes)
+                .build();
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(diaryDetailRes)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    public ResponseEntity<?> searchRecord(Long diaryId, String search) {
+        Optional<Diary> diary = diaryRepository.findById(diaryId);
+        DefaultAssert.isTrue(diary.isPresent(), "다이어리가 올바르지 않습니다");
+
+        List<Record> records = diary.get().getRecords();
+        DefaultAssert.isTrue(!records.isEmpty(), "일기가 존재하지 않습니다.");
+
+        List<Record> searchRecords = records.stream()
+                .filter(record -> record.getTitle().contains(search))
+                .toList();
+        DefaultAssert.isTrue(!searchRecords.isEmpty(), "검색어에 해당하는 일기가 존재하지 않습니다.");
+
+        List<DiaryRecordDetailRes> responseRecords = searchRecords.stream()
+                .map(record -> DiaryRecordDetailRes.builder()
+                        .id(record.getId())
+                        .title(record.getTitle())
+                        .content(record.getContent())
+                        .date(record.getDate())
+                        .user(UserDetailRes.builder()
+                                .email(record.getUser().getEmail())
+                                .nickname(record.getUser().getNickname())
+                                .imageUrl(record.getUser().getImageUrl())
+                                .role(record.getUser().getRole())
+                                .build())
+                        .likeCount(likesRepository.findAllByRecordId(record.getId()).size())
+                        .commentCount(commentRepository.findAllByRecordId(record.getId()).size())
                         .build())
                 .toList();
 
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
-                .information(userDetailRes)
+                .information(responseRecords)
                 .build();
 
         return ResponseEntity.ok(apiResponse);
