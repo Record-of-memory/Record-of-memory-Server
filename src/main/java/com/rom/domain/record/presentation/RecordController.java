@@ -130,7 +130,7 @@ public class RecordController {
     //일기 수정
     @Operation(summary = "일기 수정", description = "일기를 수정합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "일기 수정 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RecordDetailRes.class))}),
+            @ApiResponse(responseCode = "200", description = "일기 수정 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))}),
             @ApiResponse(responseCode = "400", description = "일기 수정 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
     @PatchMapping(value = "/edit", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})

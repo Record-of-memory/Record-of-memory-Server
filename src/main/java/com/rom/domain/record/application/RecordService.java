@@ -262,9 +262,11 @@ public class RecordService {
             findRecord.updateContent(updateRecordReq.getContent());
         }
 
-        if (!img.isEmpty()){
+        if (!img.isEmpty()) {
             String storedFileName = s3Uploader.upload(img, "record_img");
             findRecord.updateImg(storedFileName);
+        }else{
+            findRecord.updateImg(null);
         }
 
         ApiResponse apiResponse = ApiResponse.builder()
