@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -155,10 +156,10 @@ public class RecordService {
     }
 
     // 다이어리별 일기 조회(유저별)
-    public ResponseEntity<?> getRecordsOfDiaryByUser(RecordsByUserReq recordsByUserReq) {
+    public ResponseEntity<?> getRecordsOfDiaryByUser(Long diaryId, Long userId) {
 
-        Optional<Diary> diary = diaryRepository.findById(recordsByUserReq.getDiaryId());
-        Optional<User> user = userRepository.findById(recordsByUserReq.getUserId());
+        Optional<Diary> diary = diaryRepository.findById(diaryId);
+        Optional<User> user = userRepository.findById(userId);
         List<Record> records = recordRepository.findAllByDiaryAndUser(diary.get(), user);
 
         List<RecordDetailRes> recordDetailRes = records.stream().map(
@@ -185,10 +186,10 @@ public class RecordService {
     }
 
     // 다이어리별 일기 조회(날짜별)
-    public ResponseEntity<?> getRecordsOfDiaryByDate(RecordDateReq recordDateReq) {
+    public ResponseEntity<?> getRecordsOfDiaryByDate(Long diaryId, Date date) {
 
-        Optional<Diary> diary = diaryRepository.findById(recordDateReq.getDiaryId());
-        List<Record> records = recordRepository.findAllByDiaryAndDate(diary.get(), recordDateReq.getDate());
+        Optional<Diary> diary = diaryRepository.findById(diaryId);
+        List<Record> records = recordRepository.findAllByDiaryAndDate(diary.get(), date);
 
         List<RecordDetailRes> recordDetailRes = records.stream().map(
                 record -> RecordDetailRes.builder()
