@@ -51,4 +51,20 @@ public class Record extends BaseEntity {
         this.imgUrl = imgUrl;
     }
 
+    public void updateDate(Date date) {
+        this.date = date;
+    }
+
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
+    public void updateImg(String imgUrl) {
+        this.imgUrl = imgUrl;
+    }
+
 }
