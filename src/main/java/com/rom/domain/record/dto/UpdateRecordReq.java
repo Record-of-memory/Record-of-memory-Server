@@ -1,5 +1,6 @@
 package com.rom.domain.record.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -12,7 +13,9 @@ public class UpdateRecordReq {
     @NotNull
     private Long recordId;
 
-    @Schema(type = "date", example = "2023-01-26", description = "일기의 날짜 수정")
+    @Schema(type = "string", example = "2023-01-26", description = "일기의 날짜 수정")
+    @NotNull
+    @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
     private Date date;
 
     @Schema(type = "string", example = "핑크뮬리가 예뻤다", description = "수정할 일기 제목")
