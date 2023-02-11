@@ -127,17 +127,19 @@ public class RecordController {
         return recordService.deleteRecord(userPrincipal, deleteRecordReq);
     }
 
+    //일기 수정
     @Operation(summary = "일기 수정", description = "일기를 수정합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "일기 수정 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RecordDetailRes.class))}),
+            @ApiResponse(responseCode = "200", description = "일기 수정 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))}),
             @ApiResponse(responseCode = "400", description = "일기 수정 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
-    @PatchMapping("/edit")
+    @PatchMapping(value = "/edit", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> updateRecord(
             @Parameter(description = "AccessToken을 입력해주세요", required = true) @CurrentUser UserPrincipal userPrincipal,
-            @Parameter(description = "Schemas의 UpdateRecordReq를 참고해주세요.", required = true) @Valid @RequestBody UpdateRecordReq updateRecordReq
-    ){
-        return recordService.updateRecord(userPrincipal, updateRecordReq);
+            @Parameter(description = "Schemas의 updateRecordReq를 참고해주세요.") @Valid @RequestPart("updateRecordReq") UpdateRecordReq updateRecordReq,
+            @Parameter(description = "img의 url") @RequestPart(value = "img", required = false) MultipartFile img
+    ) throws IOException {
+        return recordService.updateRecord(userPrincipal, updateRecordReq, img);
     }
 
 }

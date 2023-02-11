@@ -242,7 +242,7 @@ public class RecordService {
 
     // 다이어리 수정
     @Transactional
-    public ResponseEntity<?> updateRecord(UserPrincipal userPrincipal, UpdateRecordReq updateRecordReq) {
+    public ResponseEntity<?> updateRecord(UserPrincipal userPrincipal, UpdateRecordReq updateRecordReq, MultipartFile img) throws IOException{
 
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         DefaultAssert.isTrue(user.isPresent(), "올바른 유저가 아닙니다.");
@@ -250,14 +250,23 @@ public class RecordService {
         Optional<Record> record = recordRepository.findById(updateRecordReq.getRecordId());
         DefaultAssert.isTrue(record.isPresent(), "일기가 올바르지 않습니다.");
 
+        Record findRecord = record.get();
+
         if (updateRecordReq.getDate() != null){
-            record.get().setDate(updateRecordReq.getDate());
+            findRecord.updateDate(updateRecordReq.getDate());
         }
         if (updateRecordReq.getTitle() != null){
-            record.get().setTitle(updateRecordReq.getTitle());
+            findRecord.updateTitle(updateRecordReq.getTitle());
         }
         if (updateRecordReq.getContent() != null){
-            record.get().setContent(updateRecordReq.getContent());
+            findRecord.updateContent(updateRecordReq.getContent());
+        }
+
+        if (!img.isEmpty()) {
+            String storedFileName = s3Uploader.upload(img, "record_img");
+            findRecord.updateImg(storedFileName);
+        }else{
+            findRecord.updateImg(null);
         }
 
         ApiResponse apiResponse = ApiResponse.builder()
