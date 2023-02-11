@@ -14,6 +14,6 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
     List<Record> findAllByDiaryAndDate(Diary diary, Date date);
     List<Record> findAllByDiaryAndUser(Diary diary, Optional<User> user);
 
-    List<Record> findAllByDiaryIdAndImgUrlNotNull(Long id);
+    List<Record> findAllByDiaryAndUserAndImgUrlNotNull(Diary diary, User user);
 
 }

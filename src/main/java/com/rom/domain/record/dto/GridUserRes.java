@@ -8,6 +8,8 @@ import java.util.List;
 @Data
 public class GridUserRes {
 
+    private Long id;
+
     private String nickname;
 
     private String imgUrl;
@@ -15,7 +17,8 @@ public class GridUserRes {
     private List<GridRecordRes> records;
 
     @Builder
-    public GridUserRes(String nickname, String imgUrl, List<GridRecordRes> records) {
+    public GridUserRes(Long id, String nickname, String imgUrl, List<GridRecordRes> records) {
+        this.id = id;
         this.nickname = nickname;
         this.imgUrl = imgUrl;
         this.records = records;
