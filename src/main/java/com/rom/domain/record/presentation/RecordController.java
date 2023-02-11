@@ -15,12 +15,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Date;
 
 @Tag(name="Records", description = "Records API")
 @RequiredArgsConstructor
@@ -45,25 +47,52 @@ public class RecordController {
     // 다이어리 내 유저별 일기 조회
     @Operation(summary = "유저별 일기 조회", description = "다이어리 내 해당 유저의 일기를 모두 읽어옵니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "다이어리별 일기 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RecordsByUserReq.class))}),
+            @ApiResponse(responseCode = "200", description = "다이어리별 일기 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RecordDetailRes.class))}),
             @ApiResponse(responseCode = "400", description = "다이어리별 일기 조회 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
-    @GetMapping("/user")
+    @GetMapping("user/{diaryId}/{userId}")
     public ResponseEntity<?> getRecordsOfDiaryByUser(
-            @Parameter(description = "Schemas의 RecordsByUserReq를 참고해주세요.", required = true) @Valid @RequestBody RecordsByUserReq recordsByUserReq){
-        return recordService.getRecordsOfDiaryByUser(recordsByUserReq);
+            @Parameter(description = "조회할 다이어리의 ID입니다.", required = true) @Valid @PathVariable("diaryId") Long diaryId,
+            @Parameter(description = "조회할 유저의 ID입니다.", required = true) @Valid @PathVariable("userId") Long userId) {
+        return recordService.getRecordsOfDiaryByUser(diaryId, userId);
     }
 
     // 다이어리 내 날쩌별 일기 조회
     @Operation(summary = "날짜별 일기 조회", description = "다이어리 내 해당 일자의 일기를 모두 읽어옵니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "다이어리별 일기 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RecordDateReq.class))}),
+            @ApiResponse(responseCode = "200", description = "다이어리별 일기 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RecordDetailRes.class))}),
             @ApiResponse(responseCode = "400", description = "다이어리별 일기 조회 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
-    @GetMapping("/date")
+    @GetMapping("date/{diaryId}/{date}")
     public ResponseEntity<?> getRecordsOfDiaryByDate(
-            @Parameter(description = "Schemas의 RecordDateReq를 참고해주세요.", required = true) @Valid @RequestBody RecordDateReq recordDateReq){
-        return recordService.getRecordsOfDiaryByDate(recordDateReq);
+            @Parameter(description = "조회할 다이어리의 ID입니다.", required = true) @Valid @PathVariable("diaryId") Long diaryId,
+            @Parameter(description = "조회할 날짜입니다.", required = true) @Valid @PathVariable("date") Date date) {
+        return recordService.getRecordsOfDiaryByDate(diaryId, date);
+    }
+
+    //그리드뷰 전용 일기 조회
+    @Operation(summary = "그리드뷰 일기 조회", description = "다이어리 내 이미지가 있는 일기만 읽어옵니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "그리드뷰 일기 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = GridResultRes.class))}),
+            @ApiResponse(responseCode = "400", description = "그리드뷰 일기 조회 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
+    @GetMapping("/grid/{diaryId}")
+    public ResponseEntity<?> getGridRecords(
+            @Parameter(description = "다이어리의 ID입니다.", required = true) @Valid @PathVariable("diaryId") Long diaryId){
+        return recordService.getGridRecords(diaryId);
+    }
+
+    //그리드뷰 전용 일기 조회 (상세 페이지)
+    @Operation(summary = "그리드뷰 상세 페이지 일기 조회", description = "다이어리 내 이미지가 있는 일기만 읽어옵니다 (유저 선택)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "그리드뷰 일기 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = GridResultDetailRes.class))}),
+            @ApiResponse(responseCode = "400", description = "그리드뷰 일기 조회 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
+    @GetMapping("/grid/{diaryId}/{userId}")
+    public ResponseEntity<?> getGridRecordsDetail(
+            @Parameter(description = "다이어리의 ID입니다.", required = true) @Valid @PathVariable("diaryId") Long diaryId,
+            @Parameter(description = "조회할 유저의 ID입니다.", required = true) @Valid @PathVariable("userId") Long userId){
+        return recordService.getGridRecordsDetail(diaryId, userId);
     }
 
 

@@ -7,7 +7,6 @@ import com.rom.domain.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Where;
-
 import java.util.Date;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

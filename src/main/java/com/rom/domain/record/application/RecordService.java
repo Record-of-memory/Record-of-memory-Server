@@ -1,10 +1,13 @@
 package com.rom.domain.record.application;
 
+import com.amazonaws.Response;
 import com.rom.domain.comment.domain.Comment;
 import com.rom.domain.comment.domain.repository.CommentRepository;
 import com.rom.domain.common.Status;
 import com.rom.domain.diary.domain.Diary;
+import com.rom.domain.diary.domain.UserDiary;
 import com.rom.domain.diary.domain.repository.DiaryRepository;
+import com.rom.domain.diary.domain.repository.UserDiaryRepository;
 import com.rom.domain.likes.domain.Likes;
 import com.rom.domain.likes.domain.repository.LikesRepository;
 import com.rom.domain.record.domain.Record;
@@ -24,6 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +42,7 @@ public class RecordService {
     private final UserRepository userRepository;
     private final DiaryRepository diaryRepository;
     private final RecordRepository recordRepository;
+    private final UserDiaryRepository userDiaryRepository;
     private final LikesRepository likesRepository;
     private final CommentRepository commentRepository;
     private final S3Uploader s3Uploader;
@@ -155,10 +162,14 @@ public class RecordService {
     }
 
     // 다이어리별 일기 조회(유저별)
-    public ResponseEntity<?> getRecordsOfDiaryByUser(RecordsByUserReq recordsByUserReq) {
+    public ResponseEntity<?> getRecordsOfDiaryByUser(Long diaryId, Long userId) {
 
-        Optional<Diary> diary = diaryRepository.findById(recordsByUserReq.getDiaryId());
-        Optional<User> user = userRepository.findById(recordsByUserReq.getUserId());
+        Optional<Diary> diary = diaryRepository.findById(diaryId);
+        DefaultAssert.isTrue(diary.isPresent(), "올바르지 않은 다이어리입니다.");
+
+        Optional<User> user = userRepository.findById(userId);
+        DefaultAssert.isTrue(user.isPresent(), "올바르지 않은 유저입니다.");
+
         List<Record> records = recordRepository.findAllByDiaryAndUser(diary.get(), user);
 
         List<RecordDetailRes> recordDetailRes = records.stream().map(
@@ -185,10 +196,12 @@ public class RecordService {
     }
 
     // 다이어리별 일기 조회(날짜별)
-    public ResponseEntity<?> getRecordsOfDiaryByDate(RecordDateReq recordDateReq) {
+    public ResponseEntity<?> getRecordsOfDiaryByDate(Long diaryId, Date date) {
 
-        Optional<Diary> diary = diaryRepository.findById(recordDateReq.getDiaryId());
-        List<Record> records = recordRepository.findAllByDiaryAndDate(diary.get(), recordDateReq.getDate());
+        Optional<Diary> diary = diaryRepository.findById(diaryId);
+        DefaultAssert.isTrue(diary.isPresent(), "올바르지 않은 다이어리입니다.");
+
+        List<Record> records = recordRepository.findAllByDiaryAndDate(diary.get(), date);
 
         List<RecordDetailRes> recordDetailRes = records.stream().map(
                 record -> RecordDetailRes.builder()
@@ -272,6 +285,93 @@ public class RecordService {
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
                 .information(Message.builder().message("일기가 수정되었습니다.").build())
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    //그리드뷰 전용 유저별 일기 조회
+    public ResponseEntity<?> getGridRecords(Long diaryId) {
+
+        Optional<Diary> diary = diaryRepository.findById(diaryId);
+        DefaultAssert.isTrue(diary.isPresent(), "올바른 일기가 아닙니다.");
+
+        List<User> findUser = userDiaryRepository.findAllByDiaryId(diary.get().getId()).stream()
+                .map(UserDiary::getUser)
+                .toList();
+
+        List<GridUserRes> gridUserResList = new ArrayList<>();
+
+        for (User value : findUser) {
+            List<Record> findRecords = recordRepository.findAllByDiaryAndUserAndImgUrlNotNull(diary.get(), value);
+
+            List<GridRecordRes> gridRecordRes = findRecords.stream()
+                    .map(record -> GridRecordRes.builder()
+                            .id(record.getId())
+                            .title(record.getTitle())
+                            .imgUrl(record.getImgUrl())
+                            .build())
+                    .toList();
+
+            GridUserRes gridUserRes = GridUserRes.builder()
+                    .id(value.getId())
+                    .nickname(value.getNickname())
+                    .imgUrl(value.getImageUrl())
+                    .records(gridRecordRes)
+                    .build();
+
+            gridUserResList.add(gridUserRes);
+        }
+
+        GridResultRes gridResultRes = GridResultRes.builder()
+                .id(diary.get().getId())
+                .name(diary.get().getName())
+                .users(gridUserResList)
+                .build();
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(gridResultRes)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    //그리드뷰 전용 유저별 일기 조회 (상세페이지)
+    public ResponseEntity<?> getGridRecordsDetail(Long diaryId, Long userId) {
+
+        Optional<Diary> diary = diaryRepository.findById(diaryId);
+        DefaultAssert.isTrue(diary.isPresent(), "올바른 일기가 아닙니다.");
+
+        Optional<User> findUser = userRepository.findById(userId);
+        DefaultAssert.isTrue(findUser.isPresent(), "올바른 유저가 아닙니다.");
+
+        List<Record> findRecords = recordRepository.findAllByDiaryAndUserAndImgUrlNotNull(diary.get(), findUser.get());
+
+        List<GridRecordRes> gridRecordRes = findRecords.stream()
+                .map(record -> GridRecordRes.builder()
+                        .id(record.getId())
+                        .title(record.getTitle())
+                        .imgUrl(record.getImgUrl())
+                        .build())
+                .toList();
+
+        GridUserRes gridUserRes = GridUserRes.builder()
+                .id(findUser.get().getId())
+                .nickname(findUser.get().getNickname())
+                .imgUrl(findUser.get().getImageUrl())
+                .records(gridRecordRes)
+                .build();
+
+        GridResultDetailRes gridResultDetailRes = GridResultDetailRes.builder()
+                .id(diary.get().getId())
+                .name(diary.get().getName())
+                .user(gridUserRes)
+                .build();
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(gridResultDetailRes)
                 .build();
 
         return ResponseEntity.ok(apiResponse);
