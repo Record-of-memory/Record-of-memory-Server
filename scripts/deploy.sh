@@ -20,7 +20,11 @@ else
 	sleep 5
 fi
 
-# 3) jar 파일을 배포
+# 3) app 디렉토리 권한 수정
+cd /home/ubuntu
+sudo chmod 775 app
+sudo chown ubuntu app
+
+# 4) jar 파일을 배포
 echo “> $JAR_PATH 배포”
-# nohup java -jar /home/ubuntu/app/build/libs/RecordOfMemory-0.0.1-SNAPSHOT.jar &
 nohup java -jar $JAR_PATH &
