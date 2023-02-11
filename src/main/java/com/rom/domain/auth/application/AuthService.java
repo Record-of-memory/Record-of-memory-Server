@@ -4,7 +4,6 @@ import java.net.URI;
 import java.util.Optional;
 
 import com.rom.domain.auth.dto.*;
-import com.rom.domain.likes.dto.LikeClickedRes;
 import com.rom.global.DefaultAssert;
 
 import com.rom.domain.user.domain.Role;
@@ -16,7 +15,6 @@ import com.rom.domain.auth.domain.repository.TokenRepository;
 import com.rom.domain.user.domain.repository.UserRepository;
 
 import io.jsonwebtoken.ExpiredJwtException;
-import org.hibernate.annotations.Check;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
