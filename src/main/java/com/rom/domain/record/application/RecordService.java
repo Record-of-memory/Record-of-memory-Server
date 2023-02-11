@@ -1,10 +1,13 @@
 package com.rom.domain.record.application;
 
+import com.amazonaws.Response;
 import com.rom.domain.comment.domain.Comment;
 import com.rom.domain.comment.domain.repository.CommentRepository;
 import com.rom.domain.common.Status;
 import com.rom.domain.diary.domain.Diary;
+import com.rom.domain.diary.domain.UserDiary;
 import com.rom.domain.diary.domain.repository.DiaryRepository;
+import com.rom.domain.diary.domain.repository.UserDiaryRepository;
 import com.rom.domain.likes.domain.Likes;
 import com.rom.domain.likes.domain.repository.LikesRepository;
 import com.rom.domain.record.domain.Record;
@@ -36,6 +39,7 @@ public class RecordService {
     private final UserRepository userRepository;
     private final DiaryRepository diaryRepository;
     private final RecordRepository recordRepository;
+    private final UserDiaryRepository userDiaryRepository;
     private final LikesRepository likesRepository;
     private final CommentRepository commentRepository;
     private final S3Uploader s3Uploader;
@@ -272,6 +276,53 @@ public class RecordService {
         ApiResponse apiResponse = ApiResponse.builder()
                 .check(true)
                 .information(Message.builder().message("일기가 수정되었습니다.").build())
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    //그리드뷰 전용 유저별 일기 조회
+    public ResponseEntity<?> getGridRecords(UserPrincipal userPrincipal, Long diaryId) {
+
+        Optional<User> user = userRepository.findById(userPrincipal.getId());
+        DefaultAssert.isTrue(user.isPresent(), "올바른 유저가 아닙니다.");
+
+        Optional<Diary> diary = diaryRepository.findById(diaryId);
+        DefaultAssert.isTrue(diary.isPresent(), "올바른 일기가 아닙니다.");
+
+        List<User> findUser = userDiaryRepository.findAllByDiaryId(diary.get().getId()).stream()
+                .map(UserDiary::getUser)
+                .toList();
+
+        List<Record> findRecords = recordRepository.findAllByDiaryIdAndImgUrlNotNull(diary.get().getId());
+
+        List<GridRecordRes> gridRecordRes = findRecords.stream()
+                        .map(record -> GridRecordRes.builder()
+                                .id(record.getId())
+                                .title(record.getTitle())
+                                .imgUrl(record.getImgUrl())
+                                .build())
+                .toList();
+
+
+        List<GridUserRes> gridUserRes = findUser.stream()
+                        .map(users -> GridUserRes.builder()
+                                .nickname(users.getNickname())
+                                .imgUrl(users.getImageUrl())
+                                .records(gridRecordRes)
+                                .build())
+                .toList();
+
+
+        GridResultRes gridResultRes = GridResultRes.builder()
+                .id(diary.get().getId())
+                .name(diary.get().getName())
+                .users(gridUserRes)
+                .build();
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(gridResultRes)
                 .build();
 
         return ResponseEntity.ok(apiResponse);

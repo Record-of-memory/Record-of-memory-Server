@@ -66,6 +66,20 @@ public class RecordController {
         return recordService.getRecordsOfDiaryByDate(recordDateReq);
     }
 
+    //그리드뷰 전용 일기 조회
+    @Operation(summary = "그리드뷰 일기 조회", description = "다이어리 내 이미지가 있는 일기만 읽어옵니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "그리드뷰 일기 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = GridResultRes.class))}),
+            @ApiResponse(responseCode = "400", description = "그리드뷰 일기 조회 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
+    @GetMapping("/grid/{diaryId}")
+    public ResponseEntity<?> getGridRecords(
+            @Parameter(description = "AccessToken을 입력해주세요", required = true) @CurrentUser UserPrincipal userPrincipal,
+            @Parameter(description = "다이어리의 ID입니다.", required = true) @Valid @PathVariable("diaryId") Long diaryId){
+        return recordService.getGridRecords(userPrincipal, diaryId);
+    }
+
+
 
     // 일기 상세 조회
     @Operation(summary = "일기 상세 조회", description = "원하는 일기의 내용을 상세하게 읽어옵니다.")
