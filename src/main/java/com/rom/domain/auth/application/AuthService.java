@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.Optional;
 
 import com.rom.domain.auth.dto.*;
+import com.rom.domain.likes.dto.LikeClickedRes;
 import com.rom.global.DefaultAssert;
 
 import com.rom.domain.user.domain.Role;
@@ -15,6 +16,7 @@ import com.rom.domain.auth.domain.repository.TokenRepository;
 import com.rom.domain.user.domain.repository.UserRepository;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import org.hibernate.annotations.Check;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -156,5 +158,19 @@ public class AuthService {
         return true;
     }
 
+    //이메일 중복 검사 (회원가입 시)
+    public ResponseEntity<?> checkEmail(String email){
+
+        Boolean isEmail = userRepository.existsByEmail(email);
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(CheckEmailRes.builder()
+                        .isEmail(isEmail)
+                        .build())
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
 
 }
