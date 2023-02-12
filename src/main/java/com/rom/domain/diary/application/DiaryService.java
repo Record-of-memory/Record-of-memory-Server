@@ -179,6 +179,7 @@ public class DiaryService {
                         .id(record.getId())
                         .title(record.getTitle())
                         .content(record.getContent())
+                        .imgUrl(record.getImgUrl())
                         .date(record.getDate())
                         .user(UserDetailRes.builder()
                                 .email(record.getUser().getEmail())
