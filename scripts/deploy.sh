@@ -27,4 +27,5 @@ fi
 
 # 4) jar 파일을 배포
 echo “> $JAR_PATH 배포”
-nohup java -jar $JAR_PATH &
+# nohup java -jar $JAR_PATH &
+nohup java -jar $JAR_PATH > $REPOSITORY/nohup.out 2>&1 &
