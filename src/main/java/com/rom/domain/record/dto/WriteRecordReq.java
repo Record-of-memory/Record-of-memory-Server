@@ -1,6 +1,5 @@
 package com.rom.domain.record.dto;
 
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.rom.domain.record.domain.Record;
 
