@@ -45,28 +45,26 @@ public class RecordController {
     }
 
     // 다이어리 내 유저별 일기 조회
-    @Operation(summary = "유저별 일기 조회", description = "다이어리 내 해당 유저의 일기를 모두 읽어옵니다.")
+    @Operation(summary = "유저별 일기 조회", description = "다이어리 내 해당 유저의 일기를 모두 읽어옵니다. ex./api/records/user?diaryId=1&userId=2")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "다이어리별 일기 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RecordDetailRes.class))}),
             @ApiResponse(responseCode = "400", description = "다이어리별 일기 조회 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
     @GetMapping("user/{diaryId}/{userId}")
     public ResponseEntity<?> getRecordsOfDiaryByUser(
-            @Parameter(description = "조회할 다이어리의 ID입니다.", required = true) @Valid @PathVariable("diaryId") Long diaryId,
-            @Parameter(description = "조회할 유저의 ID입니다.", required = true) @Valid @PathVariable("userId") Long userId) {
+            @Parameter(description = "Parameter - 다이어리ID(diaryId)", required = true) @Valid @RequestParam(value = "diaryId", required = true) Long diaryId, @Parameter(description = "Parameter - 유저pk(userId)", required = true) @RequestParam(value = "userId", required = true) Long userId){
         return recordService.getRecordsOfDiaryByUser(diaryId, userId);
     }
 
-    // 다이어리 내 날쩌별 일기 조회
-    @Operation(summary = "날짜별 일기 조회", description = "다이어리 내 해당 일자의 일기를 모두 읽어옵니다.")
+    // 다이어리 내 날짜별 일기 조회
+    @Operation(summary = "날짜별 일기 조회", description = "다이어리 내 해당 일자의 일기를 모두 읽어옵니다. ex./api/records/date?diaryId=1&date=2023-01-24")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "다이어리별 일기 조회 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RecordDetailRes.class))}),
             @ApiResponse(responseCode = "400", description = "다이어리별 일기 조회 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
     @GetMapping("date/{diaryId}/{date}")
     public ResponseEntity<?> getRecordsOfDiaryByDate(
-            @Parameter(description = "조회할 다이어리의 ID입니다.", required = true) @Valid @PathVariable("diaryId") Long diaryId,
-            @Parameter(description = "조회할 날짜입니다.", required = true) @Valid @PathVariable("date") Date date) {
+            @Parameter(description = "Parameter - 다이어리ID(diaryId)", required = true) @Valid @RequestParam(value = "diaryId", required = true) Long diaryId, @Parameter(description = "Parameter - 날짜(date) ex.2023-02-11", required = true) @RequestParam(value = "date", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date date) {
         return recordService.getRecordsOfDiaryByDate(diaryId, date);
     }
 
