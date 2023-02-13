@@ -118,7 +118,7 @@ public class RecordController {
     public ResponseEntity<?> writeRecord(
             @Parameter(description = "AccessToken을 입력해주세요", required = true) @CurrentUser UserPrincipal userPrincipal,
             @Parameter(description = "Schemas의 WriteRecordReq를 참고해주세요.") @Valid @RequestPart("writeRecordReq") WriteRecordReq writeRecordReq,  // @RequestBody -> @RequestPart
-            @Parameter(description = "img의 url") @RequestPart(value = "img") MultipartFile img
+            @Parameter(description = "img의 url") @RequestPart(value = "img", required = false) MultipartFile img
             ) throws IOException {
         // img 파라미터 추가
         return recordService.writeRecordWithImg(userPrincipal, writeRecordReq, img);
