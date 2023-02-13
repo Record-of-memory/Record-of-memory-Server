@@ -68,7 +68,7 @@ public class RecordService {
 
         // img가 비어있는지 체크
         // 업로드할 디렉토리 이름 설정 (record의 이미지는 record_img, 프로필의 이미지는 profile_img
-        if (!img.isEmpty()){
+        if (img != null) {
             String storedFileName = s3Uploader.upload(img, "record_img");
             record.setImgUrl(storedFileName);
         }
@@ -275,7 +275,7 @@ public class RecordService {
             findRecord.updateContent(updateRecordReq.getContent());
         }
 
-        if (!img.isEmpty()) {
+        if (img != null) {
             String storedFileName = s3Uploader.upload(img, "record_img");
             findRecord.updateImg(storedFileName);
         }else{
