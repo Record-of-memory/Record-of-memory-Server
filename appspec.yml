@@ -4,7 +4,15 @@ os: linux
 files:
   - source: /
     destination: /home/ubuntu/app  # (ec2)인스턴스에서 파일이 저장될 위치
-    
+    overwrite: yes
+   
+permissions:
+    - object: /
+      pattern: "**"
+      owner: ubuntu
+      group: ubuntu
+      mode: 775
+
 hooks:
   AfterInstall:
     - location: scripts/deploy.sh
