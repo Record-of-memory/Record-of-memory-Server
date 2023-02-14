@@ -226,25 +226,27 @@ public class RecordService {
                         .build());
                 continue;
             }
-
+            List<DiaryRecordDetailRes> detailRes = new ArrayList<>();
+            DiaryRecordDetailRes drdr = DiaryRecordDetailRes.builder()
+                    .id(record.getId())
+                    .title(record.getTitle())
+                    .content(record.getContent())
+                    .imgUrl(record.getImgUrl())
+                    .date(record.getDate())
+                    .user(UserDetailRes.builder()
+                            .email(record.getUser().getEmail())
+                            .nickname(record.getUser().getNickname())
+                            .imageUrl(record.getUser().getImageUrl())
+                            .role(record.getUser().getRole())
+                            .build())
+                    .likeCount(likesRepository.findAllByRecordId(record.getId()).size())
+                    .commentCount(commentRepository.findAllByRecordId(record.getId()).size())
+                    .build();
+            detailRes.add(drdr);
             diaryRecordDetailRes.add(FindRecordByDateRes.builder()
                     .diaryId(record.getDiary().getId())
                     .diaryName(record.getDiary().getName())
-                    .records(List.of(DiaryRecordDetailRes.builder()
-                            .id(record.getId())
-                            .title(record.getTitle())
-                            .content(record.getContent())
-                            .imgUrl(record.getImgUrl())
-                            .date(record.getDate())
-                            .user(UserDetailRes.builder()
-                                    .email(record.getUser().getEmail())
-                                    .nickname(record.getUser().getNickname())
-                                    .imageUrl(record.getUser().getImageUrl())
-                                    .role(record.getUser().getRole())
-                                    .build())
-                            .likeCount(likesRepository.findAllByRecordId(record.getId()).size())
-                            .commentCount(commentRepository.findAllByRecordId(record.getId()).size())
-                            .build()))
+                    .records(detailRes)
                     .build());
         }
 
