@@ -52,7 +52,8 @@ public class RecordController {
     })
     @GetMapping("/user")
     public ResponseEntity<?> getRecordsOfDiaryByUser(
-            @Parameter(description = "Parameter - 다이어리ID(diaryId)", required = true) @Valid @RequestParam(value = "diaryId", required = true) Long diaryId, @Parameter(description = "Parameter - 유저pk(userId)", required = true) @RequestParam(value = "userId", required = true) Long userId){
+            @Parameter(description = "Parameter - 다이어리ID(diaryId)", required = true) @Valid @RequestParam(value = "diaryId", required = true) Long diaryId,
+            @Parameter(description = "Parameter - 유저pk(userId)", required = true) @RequestParam(value = "userId", required = true) Long userId){
         return recordService.getRecordsOfDiaryByUser(diaryId, userId);
     }
 
@@ -64,8 +65,9 @@ public class RecordController {
     })
     @GetMapping("/date")
     public ResponseEntity<?> getRecordsOfDiaryByDate(
-            @Parameter(description = "Parameter - 다이어리ID(diaryId)", required = true) @Valid @RequestParam(value = "diaryId", required = true) Long diaryId, @Parameter(description = "Parameter - 날짜(date) ex.2023-02-11", required = true) @RequestParam(value = "date", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date date) {
-        return recordService.getRecordsOfDiaryByDate(diaryId, date);
+            @Parameter(description = "AccessToken을 입력해주세요", required = true) @CurrentUser UserPrincipal userPrincipal,
+            @Parameter(description = "Parameter - 날짜(date) ex.2023-02-11", required = true) @RequestParam(value = "date", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date date) {
+        return recordService.getRecordsOfDiaryByDate(userPrincipal, date);
     }
 
     //그리드뷰 전용 일기 조회
