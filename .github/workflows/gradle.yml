@@ -18,7 +18,7 @@ on:
 env:
   AWS_REGION: ap-northeast-2
   S3_BUCKET_NAME: recordofourmemorydeploybucket
-  CODE_DEPLOY_APPLICATION_NAME: RecordOfOurMemoryDeploy
+  CODE_DEPLOY_APPLICATION_NAME: ROM-blue-green-deploy
   CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: dev
 
 permissions:
@@ -27,7 +27,7 @@ permissions:
 jobs:
   build:
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
     # 작업에서 액세스할 수 있도록 $GITHUB_WORKSPACE에서 저장소르 체크아웃
