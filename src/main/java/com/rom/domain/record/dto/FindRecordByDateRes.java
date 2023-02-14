@@ -4,6 +4,7 @@ import com.rom.domain.diary.dto.DiaryRecordDetailRes;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -21,4 +22,5 @@ public class FindRecordByDateRes {
         this.diaryName = diaryName;
         this.records = records;
     }
+
 }
