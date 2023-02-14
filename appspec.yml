@@ -4,7 +4,8 @@ os: linux
 files:
   - source: /
     destination: /home/ubuntu/app  # (ec2)인스턴스에서 파일이 저장될 위치
-    overwrite: yes
+    overwrite: true
+file_exists_behavior: OVERWRITE
    
 permissions:
     - object: /
