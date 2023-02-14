@@ -18,7 +18,8 @@ on:
 env:
   AWS_REGION: ap-northeast-2
   S3_BUCKET_NAME: recordofourmemorydeploybucket
-  CODE_DEPLOY_APPLICATION_NAME: ROM-blue-green-deploy
+#  CODE_DEPLOY_APPLICATION_NAME: ROM-blue-green-deploy
+  CODE_DEPLOY_APPLICATION_NAME: RecordOfOurMemoryDeploy
   CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: dev
 
 permissions:
