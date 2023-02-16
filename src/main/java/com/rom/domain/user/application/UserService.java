@@ -105,7 +105,7 @@ public class UserService {
 
         findUser.updateNickName(nickname);
 
-        if (!profileImg.isEmpty()) {
+        if (profileImg != null) {
             String storedFileName = s3Uploader.upload(profileImg, "profile_img");
             findUser.updateImageUrl(storedFileName);
         }
