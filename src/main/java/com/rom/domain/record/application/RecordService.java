@@ -1,5 +1,6 @@
 package com.rom.domain.record.application;
 
+import com.amazonaws.Response;
 import com.rom.domain.comment.domain.Comment;
 import com.rom.domain.comment.domain.repository.CommentRepository;
 import com.rom.domain.common.Status;
@@ -7,6 +8,7 @@ import com.rom.domain.diary.domain.Diary;
 import com.rom.domain.diary.domain.UserDiary;
 import com.rom.domain.diary.domain.repository.DiaryRepository;
 import com.rom.domain.diary.domain.repository.UserDiaryRepository;
+import com.rom.domain.diary.dto.DiaryDetailRes;
 import com.rom.domain.diary.dto.DiaryRecordDetailRes;
 import com.rom.domain.likes.domain.Likes;
 import com.rom.domain.likes.domain.repository.LikesRepository;
@@ -295,13 +297,14 @@ public class RecordService {
 
         Record findRecord = record.get();
 
-        if (updateRecordReq.getDate() != null){
+
+        if (updateRecordReq.getDate() != null) {
             findRecord.updateDate(updateRecordReq.getDate());
         }
-        if (updateRecordReq.getTitle() != null){
+        if (updateRecordReq.getTitle() != null) {
             findRecord.updateTitle(updateRecordReq.getTitle());
         }
-        if (updateRecordReq.getContent() != null){
+        if (updateRecordReq.getContent() != null) {
             findRecord.updateContent(updateRecordReq.getContent());
         }
 
@@ -407,12 +410,12 @@ public class RecordService {
         return ResponseEntity.ok(apiResponse);
     }
 
-    public int likeCount(Long id){
+    public int likeCount(Long id) {
         List<Likes> likes = likesRepository.findAllByRecordId(id);
         return likes.size();
     }
 
-    public int commentCount(Long id){
+    public int commentCount(Long id) {
         List<Comment> comments = commentRepository.findAllByRecordId(id);
         return comments.size();
     }
