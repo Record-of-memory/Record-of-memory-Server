@@ -245,4 +245,27 @@ public class DiaryService {
         return ResponseEntity.ok(apiResponse);
     }
 
+
+    //다이어리 수정
+    @Transactional
+    public ResponseEntity<?> updateDiary(UserPrincipal userPrincipal, UpdateDiaryReq updateDiaryReq) {
+
+        Optional<User> user = userRepository.findById(userPrincipal.getId());
+        DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다.");
+
+        Optional<Diary> diary = diaryRepository.findById(updateDiaryReq.getDiaryId());
+        DefaultAssert.isTrue(diary.isPresent(), "다이어리가 올바르지 않습니다.");
+
+        Diary updateDiary = diary.get();
+
+        updateDiary.updateName(updateDiaryReq.getName());
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(Message.builder().message("다이어리 이름이 수정되었습니다.").build())
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
 }
