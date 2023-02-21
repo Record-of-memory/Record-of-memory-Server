@@ -48,6 +48,8 @@ jobs:
         touch ./src/main/resources/application.properties
         echo "${{ secrets.ENV_VARS }}" >> src/main/resources/application.properties
         
+        echo "${{ secrets.ENV_VARS_APP }}" > src/main/resources/application.yml
+        
         mkdir ./src/main/resources/database
         touch ./src/main/resources/database/application-database.yml
         echo "${{ secrets.ENV_VARS_DB }}" >> src/main/resources/database/application-database.yml
