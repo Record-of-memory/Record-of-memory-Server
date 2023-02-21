@@ -15,6 +15,17 @@ spring:
   mvc:
     path match:
       matching-strategy: ant_path_matcher
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: woori.memory@gmail.com
+    password: pfzkjixaaddokvnm
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 # 오류 처리
 server:

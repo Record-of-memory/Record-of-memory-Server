@@ -39,5 +39,6 @@ out/
 /src/main/resources/database/
 
 /src/main/resources/application.properties
+/src/main/resources/application.yml
 /src/main/resources/database/application-database.yml
 /src/main/resources/auth/application-auth.yml
