@@ -297,6 +297,7 @@ public class RecordService {
 
         Record findRecord = record.get();
 
+
         if (updateRecordReq.getDate() != null) {
             findRecord.updateDate(updateRecordReq.getDate());
         }

@@ -102,4 +102,17 @@ public class DiaryController {
         return diaryService.searchRecord(diaryId, search);
     }
 
+    @Operation(summary = "다이어리 이름 변경", description = "다이어리 이름을 변경합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "다이어리 이름 변경 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))}),
+            @ApiResponse(responseCode = "400", description = "다이어리 이름 변경 실패", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
+    @PatchMapping
+    public ResponseEntity<?> updateDiary(
+            @Parameter(description = "AccessToken을 입력해주세요", required = true) @CurrentUser UserPrincipal userPrincipal,
+            @Parameter(description = "UpdateDiaryReq를 참고해주세요.", required = true) @Valid @RequestBody UpdateDiaryReq updateDiaryReq
+    ){
+        return diaryService.updateDiary(userPrincipal, updateDiaryReq);
+    }
+
 }
