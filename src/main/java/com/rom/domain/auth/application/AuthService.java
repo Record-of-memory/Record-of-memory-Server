@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.Optional;
 
 import com.rom.domain.auth.dto.*;
+import com.rom.domain.auth.dto.SendPasswordReq;
 import com.rom.global.DefaultAssert;
 
 import com.rom.domain.user.domain.Role;
@@ -15,7 +16,9 @@ import com.rom.domain.auth.domain.repository.TokenRepository;
 import com.rom.domain.user.domain.repository.UserRepository;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,7 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
+import org.springframework.mail.javamail.JavaMailSender;
 import lombok.RequiredArgsConstructor;
 
 
@@ -35,9 +38,9 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final CustomTokenProviderService customTokenProviderService;
-
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
+    private final JavaMailSender mailSender;
 
     @Transactional
     public ResponseEntity<?> signIn(SignInReq signInRequest) {
@@ -171,4 +174,31 @@ public class AuthService {
         return ResponseEntity.ok(apiResponse);
     }
 
+    //이메일을 통한 임시 비밀번호 발급
+    @Transactional
+    public ResponseEntity<?> sendTemporaryPassword(SendPasswordReq sendPasswordReq) {
+
+        Optional<User> findUser = userRepository.findByEmailAndNickname(sendPasswordReq.getEmail(), sendPasswordReq.getNickname());
+        DefaultAssert.isTrue(findUser.isPresent(), "이메일 주소를 다시 한 번 확인해주세요.");
+
+        String temporaryPassword = RandomStringUtils.randomAlphanumeric(8);
+
+        SimpleMailMessage message = new SimpleMailMessage();
+
+        message.setTo(sendPasswordReq.getEmail());
+        message.setFrom("woori.memory@gmail.com");
+        message.setSubject("[우리기억] 임시 비밀번호 안내입니다.");
+        message.setText(String.format("안녕하세요.\n요청하신 임시 비밀번호가 발급되었습니다.\n임시 비밀번호로 로그인 후, 마이페이지에서 비밀번호를 변경해주세요!\n\n%s\n\n감사합니다.",temporaryPassword));
+
+        mailSender.send(message);
+
+        findUser.get().updatePassword(passwordEncoder.encode(temporaryPassword));
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .check(true)
+                .information(Message.builder().message("임시 비밀번호가 발송되었습니다.").build())
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
 }

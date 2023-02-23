@@ -1,14 +1,13 @@
 package com.rom.domain.auth.presentation;
 
 
-import com.rom.domain.likes.dto.LikeClickedRes;
+import com.rom.domain.auth.dto.SendPasswordReq;
 import jakarta.validation.Valid;
 
 import com.rom.domain.auth.dto.*;
 import com.rom.global.payload.ErrorResponse;
 import com.rom.global.config.security.token.CurrentUser;
 import com.rom.global.config.security.token.UserPrincipal;
-import com.rom.domain.user.domain.User;
 import com.rom.global.payload.Message;
 import com.rom.domain.auth.application.AuthService;
 
@@ -94,5 +93,17 @@ public class AuthController {
             @Parameter(description = "중복 검사할 이메일입니다.", required = true) @Valid @PathVariable("email") String email
     ){
         return authService.checkEmail(email);
+    }
+
+    @Operation(summary = "이메일로 임시 비밀번호 발급")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "이메일로 임시 번호를 발급했습니다.", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))}),
+            @ApiResponse(responseCode = "400", description = "이메일로 임시 번호를 발급하지 못했습니다..", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
+    @PostMapping("/send")
+    public ResponseEntity<?> sendTemporaryPassword(
+            @Parameter(description = "SendPasswordReq를 참고해주세요.", required = true) @Valid @RequestBody SendPasswordReq sendPasswordReq
+    ){
+        return authService.sendTemporaryPassword(sendPasswordReq);
     }
 }
