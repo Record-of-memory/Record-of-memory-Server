@@ -91,10 +91,11 @@ public class CommentService {
         DefaultAssert.isTrue(record.isPresent(), "일기가 올바르지 않습니다.");
 
         List<Comment> comments = commentRepository.findAllByRecordIdOrderByCreatedAtDesc(recordId);
+
         List<FindCommentRes> findCommentRes = comments.stream()
                 .map(comment -> FindCommentRes.builder()
-                        .nickname(user.get().getNickname())
-                        .imageUrl(user.get().getImageUrl())
+                        .nickname(comment.getUser().getNickname())
+                        .imageUrl(comment.getUser().getImageUrl())
                         .content(comment.getContent())
                         .createdAt(comment.getCreatedAt())
                         .build())
