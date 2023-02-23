@@ -7,7 +7,6 @@ import com.rom.domain.auth.domain.Token;
 import com.rom.domain.auth.domain.repository.TokenRepository;
 import com.rom.domain.common.Status;
 import com.rom.domain.user.dto.ChangePasswordReq;
-import com.rom.domain.user.dto.SendPasswordReq;
 import com.rom.domain.user.dto.UserDetailRes;
 import com.rom.global.DefaultAssert;
 import com.rom.domain.user.domain.User;
@@ -17,11 +16,7 @@ import com.rom.global.payload.ApiResponse;
 import com.rom.domain.user.domain.repository.UserRepository;
 
 import com.rom.global.payload.Message;
-import lombok.Builder;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +33,6 @@ public class UserService {
     private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final S3Uploader s3Uploader;
-    private final JavaMailSender mailSender;
 
     public ResponseEntity<?> findUserById(Long id) {
         Optional<User> user = userRepository.findById(id);
