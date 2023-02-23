@@ -1,7 +1,6 @@
 package com.rom.domain.user.application;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 
 import com.rom.domain.auth.domain.Token;
@@ -34,7 +33,6 @@ public class UserService {
     private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final S3Uploader s3Uploader;
-
 
     public ResponseEntity<?> findUserById(Long id) {
         Optional<User> user = userRepository.findById(id);
@@ -155,4 +153,5 @@ public class UserService {
 
         return ResponseEntity.ok(apiResponse);
     }
+
 }
