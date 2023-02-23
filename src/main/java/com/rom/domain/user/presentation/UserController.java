@@ -2,6 +2,7 @@ package com.rom.domain.user.presentation;
 
 import com.rom.domain.user.application.UserService;
 import com.rom.domain.user.dto.ChangePasswordReq;
+import com.rom.domain.user.dto.SendPasswordReq;
 import com.rom.domain.user.dto.UserDetailRes;
 import com.rom.global.config.security.token.CurrentUser;
 import com.rom.global.config.security.token.UserPrincipal;
@@ -108,4 +109,15 @@ public class UserController {
         return userService.deleteUser(userPrincipal);
     }
 
+    @Operation(summary = "이메일로 임시 비밀번호 전송")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "이메일로 임시 번호를 전송했습니다.", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))}),
+            @ApiResponse(responseCode = "400", description = "이메일로 임시 번호를 전송하지 못했습니다..", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
+    @PostMapping("/me/send")
+    public ResponseEntity<?> sendTemporaryPassword(
+            @Parameter(description = "SendPasswordReq를 참고해주세요.", required = true) @Valid @RequestBody SendPasswordReq sendPasswordReq
+    ){
+        return userService.sendTemporaryPassword(sendPasswordReq);
+    }
 }
