@@ -1,4 +1,4 @@
-package com.rom.domain.user.dto;
+package com.rom.domain.auth.dto;
 
 
 import io.swagger.v3.oas.annotations.media.Schema;
