@@ -353,7 +353,9 @@ public class RecordService {
                     .records(gridRecordRes)
                     .build();
 
-            gridUserResList.add(gridUserRes);
+            if (gridRecordRes.size() != 0) {
+                gridUserResList.add(gridUserRes);
+            }
         }
 
         GridResultRes gridResultRes = GridResultRes.builder()
