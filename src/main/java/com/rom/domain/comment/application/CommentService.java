@@ -12,6 +12,7 @@ import com.rom.global.DefaultAssert;
 import com.rom.global.config.security.token.UserPrincipal;
 import com.rom.global.payload.ApiResponse;
 import com.rom.global.payload.Message;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -70,6 +72,9 @@ public class CommentService {
         Optional<Comment> comment = commentRepository.findById(deleteCommentReq.getCommentId());
         DefaultAssert.isTrue(comment.isPresent(), "댓글이 올바르지 않습니다");
 
+        boolean isMyComment = Objects.equals(comment.get().getUser().getId(), user.get().getId());
+
+        DefaultAssert.isTrue(isMyComment, "자신의 댓글이 아닙니다.");
         comment.get().updateStatus(Status.DELETE);
 
         ApiResponse apiResponse = ApiResponse.builder()
