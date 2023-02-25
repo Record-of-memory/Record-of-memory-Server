@@ -10,6 +10,9 @@ import java.time.LocalDateTime;
 @Data
 public class FindCommentRes {
 
+    @Schema(type = "Long", example = "1", description = "댓글의 ID입니다.")
+    private Long id;
+
     @Schema(type = "String", example = "보라", description = "댓글 작성자의 닉네임입니다.")
     private String nickname;
 
@@ -23,7 +26,8 @@ public class FindCommentRes {
     private LocalDateTime createdAt;
 
     @Builder
-    public FindCommentRes(String nickname, String imageUrl, String content, LocalDateTime createdAt) {
+    public FindCommentRes(Long id, String nickname, String imageUrl, String content, LocalDateTime createdAt) {
+        this.id = id;
         this.nickname = nickname;
         this.imageUrl = imageUrl;
         this.content = content;
