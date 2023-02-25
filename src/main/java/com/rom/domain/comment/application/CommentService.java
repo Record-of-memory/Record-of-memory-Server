@@ -94,6 +94,7 @@ public class CommentService {
 
         List<FindCommentRes> findCommentRes = comments.stream()
                 .map(comment -> FindCommentRes.builder()
+                        .id(comment.getId())
                         .nickname(comment.getUser().getNickname())
                         .imageUrl(comment.getUser().getImageUrl())
                         .content(comment.getContent())
