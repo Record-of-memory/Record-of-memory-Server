@@ -25,13 +25,17 @@ public class FindCommentRes {
     @Schema(type = "LocalDateTime", example = "22.11.25", description = "댓글을 작성한 날짜입니다.")
     private LocalDateTime createdAt;
 
+    @Schema(type = "Boolean", example = "true", description = "자신의 댓글이면 true입니다.")
+    private Boolean isMyComment;
+
     @Builder
-    public FindCommentRes(Long id, String nickname, String imageUrl, String content, LocalDateTime createdAt) {
+    public FindCommentRes(Long id, String nickname, String imageUrl, String content, LocalDateTime createdAt, Boolean isMyComment) {
         this.id = id;
         this.nickname = nickname;
         this.imageUrl = imageUrl;
         this.content = content;
         this.createdAt = createdAt;
+        this.isMyComment = isMyComment;
     }
 
 }
