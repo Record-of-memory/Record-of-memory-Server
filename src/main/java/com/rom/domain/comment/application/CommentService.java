@@ -104,6 +104,7 @@ public class CommentService {
                         .imageUrl(comment.getUser().getImageUrl())
                         .content(comment.getContent())
                         .createdAt(comment.getCreatedAt())
+                        .isMyComment(Objects.equals(comment.getUser().getId(), user.get().getId()))
                         .build())
                 .collect(Collectors.toList());
 
