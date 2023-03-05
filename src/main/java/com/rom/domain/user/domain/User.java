@@ -37,7 +37,6 @@ public class User extends BaseEntity {
     private String nickname;
 
     @JsonIgnore
-    @Column(nullable = false)
     private String password;
 
     private String imageUrl;

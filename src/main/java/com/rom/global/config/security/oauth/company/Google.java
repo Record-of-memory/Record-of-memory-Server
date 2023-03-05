@@ -37,6 +37,6 @@ public class Google extends OAuth2UserInfo {
 
     @Override
     public String getProvider(){
-        return Provider.GOOGLE.toString();
+        return Provider.google.toString();
     }
 }
