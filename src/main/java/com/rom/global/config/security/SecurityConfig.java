@@ -1,5 +1,9 @@
 package com.rom.global.config.security;
 
+import com.rom.domain.auth.application.CustomDefaultOAuth2UserService;
+import com.rom.domain.auth.domain.repository.CustomAuthorizationRequestRepository;
+import com.rom.global.config.security.handler.CustomSimpleUrlAuthenticationFailureHandler;
+import com.rom.global.config.security.handler.CustomSimpleUrlAuthenticationSuccessHandler;
 import com.rom.global.config.security.token.CustomAuthenticationEntryPoint;
 import com.rom.global.config.security.token.CustomOncePerRequestFilter;
 import com.rom.domain.auth.application.CustomUserDetailsService;
@@ -32,6 +36,10 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
     
     private final CustomUserDetailsService customUserDetailsService;
+    private final CustomDefaultOAuth2UserService customOAuth2UserService;
+    private final CustomSimpleUrlAuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final CustomSimpleUrlAuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+    private final CustomAuthorizationRequestRepository customAuthorizationRequestRepository;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -85,7 +93,22 @@ public class SecurityConfig {
                     .requestMatchers("/blog/**")
                         .permitAll()
                     .anyRequest()
-                        .authenticated();
+                        .authenticated()
+                    .and()
+                .oauth2Login()
+                    .authorizationEndpoint()
+                        .baseUri("/oauth2/authorize")
+                        .authorizationRequestRepository(customAuthorizationRequestRepository)
+                        .and()
+                    .redirectionEndpoint()
+                        .baseUri("/oauth2/callback/**")
+                        .and()
+                    .userInfoEndpoint()
+                        .userService(customOAuth2UserService)
+                        .and()
+                    .successHandler(oAuth2AuthenticationSuccessHandler)
+                    .failureHandler(oAuth2AuthenticationFailureHandler);
+
         http.addFilterBefore(customOncePerRequestFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
