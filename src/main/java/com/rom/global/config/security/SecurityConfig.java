@@ -80,7 +80,7 @@ public class SecurityConfig {
                         .permitAll()
                     .requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**")
                         .permitAll()
-                    .requestMatchers("/login/**","/auth/**", "/oauth2/**")
+                    .requestMatchers("/login/**", "/oauth2/**", "/oauth2/**")
                         .permitAll()
                     .requestMatchers("/blog/**")
                         .permitAll()
