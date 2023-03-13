@@ -4,6 +4,7 @@ import com.rom.domain.common.BaseEntity;
 import com.rom.domain.user.domain.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -16,11 +17,17 @@ public class FriendRequest extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User fromUserId;
+    @JoinColumn(name = "from_user_id")
+    private User fromUser;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User toUserId;
+    @JoinColumn(name = "to_user_id")
+    private User toUser;
+
+    @Builder
+    public FriendRequest(User fromUser, User toUser) {
+        this.fromUser = fromUser;
+        this.toUser = toUser;
+    }
 
 }

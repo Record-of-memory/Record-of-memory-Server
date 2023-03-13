@@ -21,7 +21,7 @@ public class FriendShip extends BaseEntity {
     private User userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "friend_id")
     private User friendId;
 
     @Builder
