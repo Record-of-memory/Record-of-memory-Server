@@ -24,6 +24,8 @@ public class FriendService {
     private final FriendRequestRepository friendRequestRepository;
     private final FriendShipRepository friendShipRepository;
 
+
+    //친구 요청
     public ResponseEntity<?> requestFriendShip(RequestFriendReq requestFriendReq, UserPrincipal userPrincipal) {
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         DefaultAssert.isTrue(user.isPresent(), "유저가 올바르지 않습니다.");
