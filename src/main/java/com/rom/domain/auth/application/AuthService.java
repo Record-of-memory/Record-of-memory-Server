@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import com.rom.domain.auth.dto.*;
 import com.rom.domain.auth.dto.SendPasswordReq;
+import com.rom.domain.user.domain.Provider;
 import com.rom.global.DefaultAssert;
 
 import com.rom.domain.user.domain.Role;
@@ -84,6 +85,7 @@ public class AuthService {
                 .email(signUpRequest.getEmail())
                 .password(passwordEncoder.encode(signUpRequest.getPassword()))
                 .role(Role.USER)
+                .provider(Provider.local)
                 .build();
 
         userRepository.save(user);
