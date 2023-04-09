@@ -78,7 +78,8 @@ SNS는 다른 사람을 의식하게 되어서 불편해, 정말 쓰고 싶은 �
 
 ## ERD
 
-<img src="https://user-images.githubusercontent.com/68095767/228450705-fb3701ac-8a95-4db9-9d2e-672c7523c475.png" alt="ROM erd">
+<img src="https://user-images.githubusercontent.com/95167215/230749697-ae90b716-cdca-49fe-9def-9511c685f423.png" alt="ROM erd">
+
 
 <br />
 <br />
